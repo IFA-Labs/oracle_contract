@@ -8,22 +8,79 @@ interface IIfaPriceFeed {
         Backward // asset1/asset0
 
     }
+    /// @notice Thrown when an invalid asset index is used. i.e  asset does not exist
+    /// @param _assetIndex The invalid asset index.
 
     error InvalidAssetIndex(uint64 _assetIndex);
 
+    /// @notice Thrown when the length of two asset index arrays are not equal.
+    /// @param _assetIndex0 The length of the first asset index array.
+    /// @param _assetIndex1 The length of the second asset index array.
+    error InvalidAssetIndexLength(uint256 _assetIndex0, uint256 _assetIndex1);
+
+    /// @notice Thrown when the length of asset index arrays and direction array are not equal.
+    /// @param _assetIndex0 The length of the first asset index array.
+    /// @param _assetIndex1 The length of the second asset index array.
+    /// @param _direction The length of the direction array.
+    error InvalidAssetorDirectionIndexLength(uint256 _assetIndex0, uint256 _assetIndex1, uint256 _direction);
+
     struct PriceFeed {
-        uint256 decimals;
+        uint8 decimal;
         uint256 lastUpdateTime;
         uint256 price;
         uint256 roundId;
     }
 
-    function getAssetbyTokenAddress() external;
-    function getAssetsbyTokenAddress() external;
-    function getAssetInfo(uint64 _assetIndex) external;
-    function getAssetsInfo(uint64[] memory _assetIndexes) external;
-    function UpdatePriceFeed() external;
-    function getPairbyIds(uint64 _assetIndex0, uint64 _assetIndex1, PairDirection _direction) external;
-    function getPairsbyIds(uint64[] memory _assetIndexes0, uint64[] memory _assetsIndexes1, PairDirection _direction)
-        external;
+    struct DerviedPair {
+        uint8 decimal;
+        uint256 lastUpdateTime; // the  min of  asset0.lastUpdateTime  and asset1.lastUpdateTime
+        uint256 derivedPrice;
+        int256 roundDifference; //  roundDifference = asset0.roundId - asset1.roundId  if Pair direction is Forward  otherwise  roundDifference = asset1.roundId  - asset0.roundId
+    }
+
+    /// @notice Get the price information of an asset
+    /// @param _assetIndex The index of the asset
+    /// @return assetInfo The price information of the asset
+    function getAssetInfo(uint64 _assetIndex) external returns (PriceFeed memory assetInfo);
+
+    /// @notice Get the price information of multiple assets
+    /// @param _assetIndexes The array of asset indexes
+    /// @return assetsInfo The price information of the assets
+    function getAssetsInfo(uint64[] memory _assetIndexes) external returns (PriceFeed[] memory assetsInfo);
+
+    /// @notice Retrieves pair information for a given asset pair and direction.
+    /// @param _assetIndex0 Index of the first asset.
+    /// @param _assetIndex1 Index of the second asset.
+    /// @param _direction Direction of the pair (Forward or Backward).
+    /// @return pairInfo The derived pair information.
+    function getPairbyId(uint64 _assetIndex0, uint64 _assetIndex1, PairDirection _direction)
+        external
+        returns (DerviedPair memory pairInfo);
+
+    /// @notice Retrieves pair information for multiple asset pairs with specified directions.
+    /// @param _assetIndexes0 Array of indexes for the first assets in pairs.
+    /// @param _assetsIndexes1 Array of indexes for the second assets in pairs.
+    /// @param _direction Array of directions for each pair (Forward or Backward).
+    /// @return pairsInfo Array of derived pair information.
+    function getPairsbyId(
+        uint64[] memory _assetIndexes0,
+        uint64[] memory _assetsIndexes1,
+        PairDirection[] memory _direction
+    ) external returns (DerviedPair[] memory pairsInfo);
+
+    /// @notice Retrieves pair information for multiple asset pairs in the forward direction.
+    /// @param _assetIndexes0 Array of indexes for the first assets in pairs.
+    /// @param _assetsIndexes1 Array of indexes for the second assets in pairs.
+    /// @return pairsInfo Array of derived pair information.
+    function getPairsbyIdForward(uint64[] memory _assetIndexes0, uint64[] memory _assetsIndexes1)
+        external
+        returns (DerviedPair[] memory pairsInfo);
+
+    /// @notice Retrieves pair information for multiple asset pairs in the backward direction.
+    /// @param _assetIndexes0 Array of indexes for the first assets in pairs.
+    /// @param _assetsIndexes1 Array of indexes for the second assets in pairs.
+    /// @return pairsInfo Array of derived pair information.
+    function getPairsbyIdBackward(uint64[] memory _assetIndexes0, uint64[] memory _assetsIndexes1)
+        external
+        returns (DerviedPair[] memory pairsInfo);
 }
