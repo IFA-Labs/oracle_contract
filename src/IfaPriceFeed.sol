@@ -6,33 +6,167 @@ import {IIfaPriceFeed} from "./Interface/IIfaPriceFeed.sol";
 
 /// @title IFALABS Oracle Price Feed Contract
 /// @author IFALABS
-/// @notice This contract is used for to storing the exchange rate of Assets
+/// @notice This contract is used for to storing the exchange rate of Assets  and calculating the price of Paira
 /// @dev  what is an asset? A asset is a token price  with respect to USD  e.g CNGN/USD
+/// @dev  what is a pair? A pair is a combination of two asset with respect to each out  e.g CNGN/BTC
 abstract contract IfaPriceFeed is IIfaPriceFeed {
+    uint8 constant MAX_DECIMAL = 18; //@follow-up  i meant increase since some pairs will be very small(e.g CNGN/BTC) and some will be very large(e.g BTC/CNGN)
+
     /// @notice Mapping of asset index to its price information
     mapping(uint64 assetIndex => PriceFeed assetInfo) _assetInfo;
 
-    /// @notice Returns the price information of an asset
-    /// @param _assetIndex The index of the asset
-    /// returns The price information of the asset
-    function _getAssetInfo(uint64 _assetIndex) internal view returns (PriceFeed memory assetInfo) {
-        require(_assetInfo[_assetIndex].lastUpdateTime > 0, InvalidAssetIndex(_assetIndex));
-        return _assetInfo[_assetIndex];
-    }
-
     /// @notice Get the price information of an asset revert if the asset index is invalid
     /// @param _assetIndex The index of the asset
-    /// returns The price information of the asset
+    /// @return assetInfo The price information of the asset
     function getAssetInfo(uint64 _assetIndex) external view returns (PriceFeed memory assetInfo) {
         return _getAssetInfo(_assetIndex);
     }
 
     /// @notice  Get the price information of an array of assets revert if any asset index is invalid
     /// @param _assetIndexes The array of asset indexes
-    /// returns The price information of the assets
+    /// @return assetsInfo The price information of the assets
     function getAssetsInfo(uint64[] memory _assetIndexes) external view returns (PriceFeed[] memory assetsInfo) {
         for (uint256 i = 0; i < _assetIndexes.length; i++) {
             assetsInfo[i] = _getAssetInfo(_assetIndexes[i]);
         }
+    }
+    /// @notice Retrieves pair information for a given asset pair and direction.
+    /// @param _assetIndex0 Index of the first asset.
+    /// @param _assetIndex1 Index of the second asset.
+    /// @param _direction Direction of the pair (Forward or Backward).
+    /// @return pairInfo The derived pair information.
+
+    function getPairbyId(uint64 _assetIndex0, uint64 _assetIndex1, PairDirection _direction)
+        external
+        view
+        returns (DerviedPair memory pairInfo)
+    {
+        return _getPairInfo(_assetIndex0, _assetIndex1, _direction);
+    }
+
+    /// @notice Retrieves pair information for multiple asset pairs in the forward direction.
+    /// @param _assetIndexes0 Array of indexes for the first assets in pairs.
+    /// @param _assetsIndexes1 Array of indexes for the second assets in pairs.
+    /// @return pairsInfo Array of derived pair information.
+    function getPairsbyIdForward(uint64[] memory _assetIndexes0, uint64[] memory _assetsIndexes1)
+        external
+        view
+        returns (DerviedPair[] memory pairsInfo)
+    {
+        require(
+            _assetIndexes0.length == _assetsIndexes1.length,
+            InvalidAssetIndexLength(_assetIndexes0.length, _assetIndexes0.length)
+        );
+        for (uint256 i = 0; i < _assetIndexes0.length; i++) {
+            pairsInfo[i] = _getPairInfo(_assetIndexes0[i], _assetsIndexes1[i], PairDirection.Forward);
+        }
+    }
+
+    /// @notice Retrieves pair information for multiple asset pairs in the backward direction.
+    /// @param _assetIndexes0 Array of indexes for the first assets in pairs.
+    /// @param _assetsIndexes1 Array of indexes for the second assets in pairs.
+    /// @return pairsInfo Array of derived pair information.
+    function getPairsbyIdBackward(uint64[] memory _assetIndexes0, uint64[] memory _assetsIndexes1)
+        external
+        view
+        returns (DerviedPair[] memory pairsInfo)
+    {
+        require(
+            _assetIndexes0.length == _assetsIndexes1.length,
+            InvalidAssetIndexLength(_assetIndexes0.length, _assetIndexes0.length)
+        );
+        for (uint256 i = 0; i < _assetIndexes0.length; i++) {
+            pairsInfo[i] = _getPairInfo(_assetIndexes0[i], _assetsIndexes1[i], PairDirection.Backward);
+        }
+    }
+
+    /// @notice Retrieves pair information for multiple asset pairs with specified directions.
+    /// @param _assetIndexes0 Array of indexes for the first assets in pairs.
+    /// @param _assetsIndexes1 Array of indexes for the second assets in pairs.
+    /// @param _direction Array of directions for each pair (Forward or Backward).
+    /// @return pairsInfo Array of derived pair information.
+    function getPairsbyId(
+        uint64[] memory _assetIndexes0,
+        uint64[] memory _assetsIndexes1,
+        PairDirection[] memory _direction
+    ) external view returns (DerviedPair[] memory pairsInfo) {
+        require(
+            _assetIndexes0.length == _assetsIndexes1.length && _assetIndexes0.length == _direction.length,
+            InvalidAssetorDirectionIndexLength(_assetIndexes0.length, _assetIndexes0.length, _direction.length)
+        );
+        for (uint256 i = 0; i < _assetIndexes0.length; i++) {
+            pairsInfo[i] = _getPairInfo(_assetIndexes0[i], _assetsIndexes1[i], _direction[i]);
+        }
+    }
+
+    /// @notice Internal function to compute derived pair information for two assets.
+    /// @param _assetIndex0 Index of the first asset.
+    /// @param _assetIndex1 Index of the second asset.
+    /// @param _direction Direction of the pair (Forward or Backward).
+    /// @return pairInfo The derived pair information.
+    function _getPairInfo(uint64 _assetIndex0, uint64 _assetIndex1, PairDirection _direction)
+        internal
+        view
+        returns (DerviedPair memory pairInfo)
+    {
+        PriceFeed memory _assetInfo0 = _getAssetInfo(_assetIndex0);
+        PriceFeed memory _assetInfo1 = _getAssetInfo(_assetIndex1);
+        uint256 _price0 = _assetInfo0.price;
+        uint256 _price1 = _assetInfo1.price;
+        uint8 _decimal0 = _assetInfo0.decimal;
+        uint8 _decimal1 = _assetInfo1.decimal;
+        uint256 _roundId0 = _assetInfo0.roundId;
+        uint256 _roundId1 = _assetInfo1.roundId;
+        uint256 derivedPrice;
+        int256 roundDifference;
+
+        if (_direction == PairDirection.Forward) {
+            // (asset0/usd) / (asset1/usd) = asset0 / asset1
+            // Scaling asset decimals to MAX_DECIMAL(18) for precision
+            derivedPrice = (_scalePrice(_price0, _decimal0) * 10 ** MAX_DECIMAL) / _scalePrice(_price1, _decimal1);
+            roundDifference = int256(_roundId0) - int256(_roundId1);
+        } else {
+            derivedPrice = (_scalePrice(_price1, _decimal1) * 10 ** MAX_DECIMAL) / _scalePrice(_price0, _decimal0);
+            roundDifference = int256(_roundId1) - int256(_roundId0);
+        }
+
+        return DerviedPair({
+            decimal: MAX_DECIMAL,
+            lastUpdateTime: _min(_assetInfo0.lastUpdateTime, _assetInfo1.lastUpdateTime),
+            derivedPrice: derivedPrice,
+            roundDifference: roundDifference
+        });
+    }
+
+    /// @notice Returns the price information of an asset with revert if the asset index is invalid
+    /// @param _assetIndex The index of the asset
+    /// @return assetInfo The price information of the asset
+
+    function _getAssetInfo(uint64 _assetIndex) internal view returns (PriceFeed memory assetInfo) {
+        require(_assetInfo[_assetIndex].lastUpdateTime > 0, InvalidAssetIndex(_assetIndex));
+        return _assetInfo[_assetIndex];
+    }
+    /// @notice Returns the minimum of two numbers
+    /// @param a The first number
+    /// @param b The second number
+    /// @return minimum The minimum of a and b
+
+    function _min(uint256 a, uint256 b) internal pure returns (uint256 minimum) {
+        if (a < b) {
+            minimum = a;
+        } else {
+            minimum = b;
+        }
+    }
+
+    /// @notice Helps to scale the price of a pair id to 18 decimal places
+    /// @dev checks if the price is in MAX_DECIMAL decimal or not . If not then will convert them to MAX_DECIMAL
+    /// @param price the price of the pair ID
+    /// @param decimal number of decimals that the pair info supports
+    /// @return the scaled prices of the pair
+
+    function _scalePrice(uint256 price, uint256 decimal) internal pure returns (uint256) {
+        if (decimal == MAX_DECIMAL) return price;
+        else return price * 10 ** (MAX_DECIMAL - decimal);
     }
 }
