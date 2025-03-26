@@ -24,6 +24,14 @@ interface IIfaPriceFeed {
     /// @param _direction The length of the direction array.
     error InvalidAssetorDirectionIndexLength(uint256 _assetIndex0, uint256 _assetIndex1, uint256 _direction);
 
+    /// @notice Thrown when  owner is trys to renounce ownership (by accident).
+    error CannotRenounceOwnership(address _owner);
+
+    /// @notice Thrown when the caller is not the Verifer contract.
+    error NotVerifier();
+    /// @notice Thrown when the verifier is set to zero address.
+    error InvalidVerifier(address _verifier);
+
     struct PriceFeed {
         uint8 decimal;
         uint256 lastUpdateTime;
@@ -32,15 +40,18 @@ interface IIfaPriceFeed {
     }
 
     struct DerviedPair {
-        uint8 decimal;
+        uint8 decimal; // DerviedPair is always  MAX_DECIMAL(18)
         uint256 lastUpdateTime; // the  min of  asset0.lastUpdateTime  and asset1.lastUpdateTime
         uint256 derivedPrice;
         int256 roundDifference; //  roundDifference = asset0.roundId - asset1.roundId  if Pair direction is Forward  otherwise  roundDifference = asset1.roundId  - asset0.roundId
     }
 
+    event AssetInfoSet(uint64 indexed _assetIndex, PriceFeed indexed assetInfo);
+    event VerifierSet(address indexed _verifier);
     /// @notice Get the price information of an asset
     /// @param _assetIndex The index of the asset
     /// @return assetInfo The price information of the asset
+
     function getAssetInfo(uint64 _assetIndex) external returns (PriceFeed memory assetInfo);
 
     /// @notice Get the price information of multiple assets
