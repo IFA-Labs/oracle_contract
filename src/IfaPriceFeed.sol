@@ -1,19 +1,37 @@
-// SPDX-License-Identifer: MIT
+// SPDX-License-Identifier: MIT
 
 pragma solidity 0.8.29;
 
 import {IIfaPriceFeed} from "./Interface/IIfaPriceFeed.sol";
+import {Ownable} from "solady-0.1.12/src/auth/Ownable.sol";
 
 /// @title IFALABS Oracle Price Feed Contract
 /// @author IFALABS
 /// @notice This contract is used for to storing the exchange rate of Assets  and calculating the price of Paira
 /// @dev  what is an asset? A asset is a token price  with respect to USD  e.g CNGN/USD
 /// @dev  what is a pair? A pair is a combination of two asset with respect to each out  e.g CNGN/BTC
-abstract contract IfaPriceFeed is IIfaPriceFeed {
+//@todo check on L2 sequencer for downtime  I guess it is not  need  dapp would have to use  Lending sequencer
+//@todo  fuctions setting  new price and proof verification  from oracle enginechainlinkBUilding
+//@todo ownables
+//@todo add setter for priviledge assess
+//@todo add proxy
+contract IfaPriceFeed is IIfaPriceFeed, Ownable {
     uint8 constant MAX_DECIMAL = 18; //@follow-up  i meant increase since some pairs will be very small(e.g CNGN/BTC) and some will be very large(e.g BTC/CNGN)
 
+    address public IfaPriceFeedVerifier;
     /// @notice Mapping of asset index to its price information
     mapping(uint64 assetIndex => PriceFeed assetInfo) _assetInfo;
+
+    constructor() {
+        _initializeOwner(msg.sender); // setting owner of contract
+    }
+
+    modifier onlyVerifier() {
+        if (msg.sender != IfaPriceFeedVerifier) {
+            revert NotVerifier();
+        }
+        _;
+    }
 
     /// @notice Get the price information of an asset revert if the asset index is invalid
     /// @param _assetIndex The index of the asset
@@ -53,6 +71,7 @@ abstract contract IfaPriceFeed is IIfaPriceFeed {
         view
         returns (DerviedPair[] memory pairsInfo)
     {
+        // sayh you have asset0 =  CNGN/USD  and  asset1 =  BTC/USD   the function will give you  CNGN/BTC
         require(
             _assetIndexes0.length == _assetsIndexes1.length,
             InvalidAssetIndexLength(_assetIndexes0.length, _assetIndexes0.length)
@@ -66,11 +85,13 @@ abstract contract IfaPriceFeed is IIfaPriceFeed {
     /// @param _assetIndexes0 Array of indexes for the first assets in pairs.
     /// @param _assetsIndexes1 Array of indexes for the second assets in pairs.
     /// @return pairsInfo Array of derived pair information.
+
     function getPairsbyIdBackward(uint64[] memory _assetIndexes0, uint64[] memory _assetsIndexes1)
         external
         view
         returns (DerviedPair[] memory pairsInfo)
     {
+        // say you have asset0 =  CNGN/USD  and  asset1 =  BTC/USD   the function will give you BTC/CNGN
         require(
             _assetIndexes0.length == _assetsIndexes1.length,
             InvalidAssetIndexLength(_assetIndexes0.length, _assetIndexes0.length)
@@ -138,6 +159,20 @@ abstract contract IfaPriceFeed is IIfaPriceFeed {
         });
     }
 
+    /// @notice Sets the price information of an asset (to be called by the verifier contract)
+    /// @param _assetIndex The index of the asset
+    /// @param assetInfo The price information of the asset
+    function setAssetInfo(uint64 _assetIndex, PriceFeed memory assetInfo) external onlyVerifier {
+        _setAssetInfo(_assetIndex, assetInfo);
+    }
+    /// @notice Sets the verifier for the price feed
+    /// @param _verifier The address of the verifier
+
+    function setVerifier(address _verifier) external onlyOwner {
+        require(_verifier != address(0), InvalidVerifier(_verifier));
+        IfaPriceFeedVerifier = _verifier;
+        emit VerifierSet(_verifier);
+    }
     /// @notice Returns the price information of an asset with revert if the asset index is invalid
     /// @param _assetIndex The index of the asset
     /// @return assetInfo The price information of the asset
@@ -145,6 +180,15 @@ abstract contract IfaPriceFeed is IIfaPriceFeed {
     function _getAssetInfo(uint64 _assetIndex) internal view returns (PriceFeed memory assetInfo) {
         require(_assetInfo[_assetIndex].lastUpdateTime > 0, InvalidAssetIndex(_assetIndex));
         return _assetInfo[_assetIndex];
+    }
+
+    /// @notice Sets the price information of an asset
+    /// @param _assetIndex The index of the asset
+    /// @param assetInfo The price information of the asset
+    function _setAssetInfo(uint64 _assetIndex, PriceFeed memory assetInfo) internal {
+        // price verification will be done on the  Verifier contract
+        _assetInfo[_assetIndex] = assetInfo;
+        emit AssetInfoSet(_assetIndex, assetInfo);
     }
     /// @notice Returns the minimum of two numbers
     /// @param a The first number
@@ -160,13 +204,21 @@ abstract contract IfaPriceFeed is IIfaPriceFeed {
     }
 
     /// @notice Helps to scale the price of a pair id to 18 decimal places
-    /// @dev checks if the price is in MAX_DECIMAL decimal or not . If not then will convert them to MAX_DECIMAL
     /// @param price the price of the pair ID
     /// @param decimal number of decimals that the pair info supports
     /// @return the scaled prices of the pair
 
     function _scalePrice(uint256 price, uint256 decimal) internal pure returns (uint256) {
-        if (decimal == MAX_DECIMAL) return price;
-        else return price * 10 ** (MAX_DECIMAL - decimal);
+        return price * 10 ** (MAX_DECIMAL - decimal);
+    }
+    ///@dev Override to return true to prevent double-initialization.
+
+    function _guardInitializeOwner() internal pure override returns (bool guard) {
+        guard = true;
+    }
+    ///@dev Prevent dev from  renouncing ownership by accident
+
+    function renounceOwnership() public payable override onlyOwner {
+        revert CannotRenounceOwnership(address(msg.sender));
     }
 }
