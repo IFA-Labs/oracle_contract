@@ -48,6 +48,8 @@ interface IIfaPriceFeed {
 
     event AssetInfoSet(uint64 indexed _assetIndex, PriceFeed indexed assetInfo);
     event VerifierSet(address indexed _verifier);
+
+    function setAssetInfo(uint64 _assetIndex, PriceFeed memory assetInfo) external;
     /// @notice Get the price information of an asset
     /// @param _assetIndex The index of the asset
     /// @return assetInfo The price information of the asset
