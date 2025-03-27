@@ -10,11 +10,7 @@ import {Ownable} from "solady-0.1.12/src/auth/Ownable.sol";
 /// @notice This contract is used for to storing the exchange rate of Assets  and calculating the price of Paira
 /// @dev  what is an asset? A asset is a token price  with respect to USD  e.g CNGN/USD
 /// @dev  what is a pair? A pair is a combination of two asset with respect to each out  e.g CNGN/BTC
-//@todo check on L2 sequencer for downtime  I guess it is not  need  dapp would have to use  Lending sequencer
-//@todo  fuctions setting  new price and proof verification  from oracle enginechainlinkBUilding
-//@todo ownables
-//@todo add setter for priviledge assess
-//@todo add proxy
+
 contract IfaPriceFeed is IIfaPriceFeed, Ownable {
     uint8 constant MAX_DECIMAL = 18; //@follow-up  i meant increase since some pairs will be very small(e.g CNGN/BTC) and some will be very large(e.g BTC/CNGN)
 
@@ -43,7 +39,7 @@ contract IfaPriceFeed is IIfaPriceFeed, Ownable {
     /// @notice  Get the price information of an array of assets revert if any asset index is invalid
     /// @param _assetIndexes The array of asset indexes
     /// @return assetsInfo The price information of the assets
-    function getAssetsInfo(uint64[] memory _assetIndexes) external view returns (PriceFeed[] memory assetsInfo) {
+    function getAssetsInfo(uint64[] calldata _assetIndexes) external view returns (PriceFeed[] memory assetsInfo) {
         for (uint256 i = 0; i < _assetIndexes.length; i++) {
             assetsInfo[i] = _getAssetInfo(_assetIndexes[i]);
         }
@@ -66,7 +62,7 @@ contract IfaPriceFeed is IIfaPriceFeed, Ownable {
     /// @param _assetIndexes0 Array of indexes for the first assets in pairs.
     /// @param _assetsIndexes1 Array of indexes for the second assets in pairs.
     /// @return pairsInfo Array of derived pair information.
-    function getPairsbyIdForward(uint64[] memory _assetIndexes0, uint64[] memory _assetsIndexes1)
+    function getPairsbyIdForward(uint64[] calldata _assetIndexes0, uint64[] calldata _assetsIndexes1)
         external
         view
         returns (DerviedPair[] memory pairsInfo)
@@ -86,7 +82,7 @@ contract IfaPriceFeed is IIfaPriceFeed, Ownable {
     /// @param _assetsIndexes1 Array of indexes for the second assets in pairs.
     /// @return pairsInfo Array of derived pair information.
 
-    function getPairsbyIdBackward(uint64[] memory _assetIndexes0, uint64[] memory _assetsIndexes1)
+    function getPairsbyIdBackward(uint64[] calldata _assetIndexes0, uint64[] calldata _assetsIndexes1)
         external
         view
         returns (DerviedPair[] memory pairsInfo)
@@ -107,9 +103,9 @@ contract IfaPriceFeed is IIfaPriceFeed, Ownable {
     /// @param _direction Array of directions for each pair (Forward or Backward).
     /// @return pairsInfo Array of derived pair information.
     function getPairsbyId(
-        uint64[] memory _assetIndexes0,
-        uint64[] memory _assetsIndexes1,
-        PairDirection[] memory _direction
+        uint64[] calldata _assetIndexes0,
+        uint64[] calldata _assetsIndexes1,
+        PairDirection[] calldata _direction
     ) external view returns (DerviedPair[] memory pairsInfo) {
         require(
             _assetIndexes0.length == _assetsIndexes1.length && _assetIndexes0.length == _direction.length,
@@ -162,7 +158,7 @@ contract IfaPriceFeed is IIfaPriceFeed, Ownable {
     /// @notice Sets the price information of an asset (to be called by the verifier contract)
     /// @param _assetIndex The index of the asset
     /// @param assetInfo The price information of the asset
-    function setAssetInfo(uint64 _assetIndex, PriceFeed memory assetInfo) external onlyVerifier {
+    function setAssetInfo(uint64 _assetIndex, PriceFeed calldata assetInfo) external onlyVerifier {
         _setAssetInfo(_assetIndex, assetInfo);
     }
     /// @notice Sets the verifier for the price feed
@@ -185,7 +181,7 @@ contract IfaPriceFeed is IIfaPriceFeed, Ownable {
     /// @notice Sets the price information of an asset
     /// @param _assetIndex The index of the asset
     /// @param assetInfo The price information of the asset
-    function _setAssetInfo(uint64 _assetIndex, PriceFeed memory assetInfo) internal {
+    function _setAssetInfo(uint64 _assetIndex, PriceFeed calldata assetInfo) internal {
         // price verification will be done on the  Verifier contract
         _assetInfo[_assetIndex] = assetInfo;
         emit AssetInfoSet(_assetIndex, assetInfo);
