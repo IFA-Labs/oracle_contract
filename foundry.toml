@@ -4,6 +4,8 @@ out = "out"
 libs = ["lib", "dependencies"]
 optimizer = true
 optimizer_runs = 1_000_000
+solc_version = "0.8.29"
+auto_detect_solc = true
 
 
 [dependencies]
