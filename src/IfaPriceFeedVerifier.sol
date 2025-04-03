@@ -6,13 +6,12 @@ import {IIfaPriceFeed} from "./Interface/IIfaPriceFeed.sol";
 import {Ownable} from "solady-0.1.12/src/auth/Ownable.sol";
 
 contract IfaPriceFeedVerifier is Ownable {
-    error CannotRenounceOwnership(address account);
     error InvalidRelayerNode(address _address);
     error OnlyRelayerNode(address _caller);
     error InvalidAssetIndexorPriceLength();
 
     address public relayerNode;
-    IIfaPriceFeed immutable IfaPriceFeed;
+    IIfaPriceFeed public immutable IfaPriceFeed;
 
     constructor(address _relayerNode, address _IIfaPriceFeed) {
         _initializeOwner(msg.sender); // setting owner of contract
@@ -35,7 +34,7 @@ contract IfaPriceFeedVerifier is Ownable {
             uint64 pair = _assetindex[i];
             IIfaPriceFeed.PriceFeed calldata currentPriceFeed = _prices[i];
             uint256 currenttimestamp = currentPriceFeed.lastUpdateTime;
-            IIfaPriceFeed.PriceFeed memory prevPriceFeed = IfaPriceFeed.getAssetInfo(pair);
+            (IIfaPriceFeed.PriceFeed memory prevPriceFeed,) = IfaPriceFeed.getAssetInfo(pair);
             if (prevPriceFeed.lastUpdateTime > currenttimestamp) {
                 continue;
             }
@@ -52,10 +51,5 @@ contract IfaPriceFeedVerifier is Ownable {
 
     function _guardInitializeOwner() internal pure override returns (bool guard) {
         guard = true;
-    }
-    ///@dev Prevent dev from  renouncing ownership by accident
-
-    function renounceOwnership() public payable override onlyOwner {
-        revert CannotRenounceOwnership(address(msg.sender));
     }
 }

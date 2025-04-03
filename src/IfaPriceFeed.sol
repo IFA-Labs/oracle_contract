@@ -32,17 +32,21 @@ contract IfaPriceFeed is IIfaPriceFeed, Ownable {
     /// @notice Get the price information of an asset revert if the asset index is invalid
     /// @param _assetIndex The index of the asset
     /// @return assetInfo The price information of the asset
-    function getAssetInfo(uint64 _assetIndex) external view returns (PriceFeed memory assetInfo) {
+    function getAssetInfo(uint64 _assetIndex) external view returns (PriceFeed memory assetInfo, bool exist) {
         return _getAssetInfo(_assetIndex);
     }
 
     /// @notice  Get the price information of an array of assets revert if any asset index is invalid
     /// @param _assetIndexes The array of asset indexes
     /// @return assetsInfo The price information of the assets
-    function getAssetsInfo(uint64[] calldata _assetIndexes) external view returns (PriceFeed[] memory assetsInfo) {
-        for (uint256 i = 0; i < _assetIndexes.length; i++) {
-            assetsInfo[i] = _getAssetInfo(_assetIndexes[i]);
+    function getAssetsInfo(uint64[] calldata _assetIndexes) external view returns (PriceFeed[] memory, bool[] memory) {
+        uint256 arrayLength = _assetIndexes.length;
+        PriceFeed[] memory assetsInfo = new PriceFeed[](arrayLength);
+        bool[] memory exists = new bool[](arrayLength);
+        for (uint256 i = 0; i < arrayLength; i++) {
+            (assetsInfo[i], exists[i]) = _getAssetInfo(_assetIndexes[i]);
         }
+        return (assetsInfo, exists);
     }
     /// @notice Retrieves pair information for a given asset pair and direction.
     /// @param _assetIndex0 Index of the first asset.
@@ -65,16 +69,19 @@ contract IfaPriceFeed is IIfaPriceFeed, Ownable {
     function getPairsbyIdForward(uint64[] calldata _assetIndexes0, uint64[] calldata _assetsIndexes1)
         external
         view
-        returns (DerviedPair[] memory pairsInfo)
+        returns (DerviedPair[] memory)
     {
+        uint256 arrayLength = _assetIndexes0.length;
+        DerviedPair[] memory pairsInfo = new DerviedPair[](arrayLength);
         // sayh you have asset0 =  CNGN/USD  and  asset1 =  BTC/USD   the function will give you  CNGN/BTC
         require(
             _assetIndexes0.length == _assetsIndexes1.length,
             InvalidAssetIndexLength(_assetIndexes0.length, _assetIndexes0.length)
         );
-        for (uint256 i = 0; i < _assetIndexes0.length; i++) {
+        for (uint256 i = 0; i < arrayLength; i++) {
             pairsInfo[i] = _getPairInfo(_assetIndexes0[i], _assetsIndexes1[i], PairDirection.Forward);
         }
+        return pairsInfo;
     }
 
     /// @notice Retrieves pair information for multiple asset pairs in the backward direction.
@@ -85,16 +92,19 @@ contract IfaPriceFeed is IIfaPriceFeed, Ownable {
     function getPairsbyIdBackward(uint64[] calldata _assetIndexes0, uint64[] calldata _assetsIndexes1)
         external
         view
-        returns (DerviedPair[] memory pairsInfo)
+        returns (DerviedPair[] memory)
     {
+        uint256 arrayLength = _assetIndexes0.length;
+        DerviedPair[] memory pairsInfo = new DerviedPair[](arrayLength);
         // say you have asset0 =  CNGN/USD  and  asset1 =  BTC/USD   the function will give you BTC/CNGN
         require(
             _assetIndexes0.length == _assetsIndexes1.length,
             InvalidAssetIndexLength(_assetIndexes0.length, _assetIndexes0.length)
         );
-        for (uint256 i = 0; i < _assetIndexes0.length; i++) {
+        for (uint256 i = 0; i < arrayLength; i++) {
             pairsInfo[i] = _getPairInfo(_assetIndexes0[i], _assetsIndexes1[i], PairDirection.Backward);
         }
+        return pairsInfo;
     }
 
     /// @notice Retrieves pair information for multiple asset pairs with specified directions.
@@ -106,14 +116,18 @@ contract IfaPriceFeed is IIfaPriceFeed, Ownable {
         uint64[] calldata _assetIndexes0,
         uint64[] calldata _assetsIndexes1,
         PairDirection[] calldata _direction
-    ) external view returns (DerviedPair[] memory pairsInfo) {
+    ) external view returns (DerviedPair[] memory) {
+        uint256 arrayLength = _assetIndexes0.length;
+        DerviedPair[] memory pairsInfo = new DerviedPair[](arrayLength);
+
         require(
             _assetIndexes0.length == _assetsIndexes1.length && _assetIndexes0.length == _direction.length,
             InvalidAssetorDirectionIndexLength(_assetIndexes0.length, _assetIndexes0.length, _direction.length)
         );
-        for (uint256 i = 0; i < _assetIndexes0.length; i++) {
+        for (uint256 i = 0; i < arrayLength; i++) {
             pairsInfo[i] = _getPairInfo(_assetIndexes0[i], _assetsIndexes1[i], _direction[i]);
         }
+        return pairsInfo;
     }
 
     /// @notice Internal function to compute derived pair information for two assets.
@@ -126,8 +140,10 @@ contract IfaPriceFeed is IIfaPriceFeed, Ownable {
         view
         returns (DerviedPair memory pairInfo)
     {
-        PriceFeed memory _assetInfo0 = _getAssetInfo(_assetIndex0);
-        PriceFeed memory _assetInfo1 = _getAssetInfo(_assetIndex1);
+        (PriceFeed memory _assetInfo0, bool exist0) = _getAssetInfo(_assetIndex0);
+        (PriceFeed memory _assetInfo1, bool exist1) = _getAssetInfo(_assetIndex1);
+        if (!exist0) revert InvalidAssetIndex(_assetIndex0);
+        if (!exist1) revert InvalidAssetIndex(_assetIndex1);
         uint256 _price0 = _assetInfo0.price;
         uint256 _price1 = _assetInfo1.price;
         uint8 _decimal0 = _assetInfo0.decimal;
@@ -173,9 +189,15 @@ contract IfaPriceFeed is IIfaPriceFeed, Ownable {
     /// @param _assetIndex The index of the asset
     /// @return assetInfo The price information of the asset
 
-    function _getAssetInfo(uint64 _assetIndex) internal view returns (PriceFeed memory assetInfo) {
-        require(_assetInfo[_assetIndex].lastUpdateTime > 0, InvalidAssetIndex(_assetIndex));
-        return _assetInfo[_assetIndex];
+    function _getAssetInfo(uint64 _assetIndex) internal view returns (PriceFeed memory assetInfo, bool exist) {
+        //require(_assetInfo[_assetIndex].lastUpdateTime > 0, InvalidAssetIndex(_assetIndex));
+        if (_assetInfo[_assetIndex].lastUpdateTime > 0) {
+            exist = true;
+            return (_assetInfo[_assetIndex], exist);
+        } else {
+            exist = false;
+            return (_assetInfo[_assetIndex], exist);
+        }
     }
 
     /// @notice Sets the price information of an asset
@@ -211,10 +233,5 @@ contract IfaPriceFeed is IIfaPriceFeed, Ownable {
 
     function _guardInitializeOwner() internal pure override returns (bool guard) {
         guard = true;
-    }
-    ///@dev Prevent dev from  renouncing ownership by accident
-
-    function renounceOwnership() public payable override onlyOwner {
-        revert CannotRenounceOwnership(address(msg.sender));
     }
 }
