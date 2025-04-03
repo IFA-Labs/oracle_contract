@@ -24,9 +24,6 @@ interface IIfaPriceFeed {
     /// @param _direction The length of the direction array.
     error InvalidAssetorDirectionIndexLength(uint256 _assetIndex0, uint256 _assetIndex1, uint256 _direction);
 
-    /// @notice Thrown when  owner is trys to renounce ownership (by accident).
-    error CannotRenounceOwnership(address _owner);
-
     /// @notice Thrown when the caller is not the Verifer contract.
     error NotVerifier();
     /// @notice Thrown when the verifier is set to zero address.
@@ -54,12 +51,14 @@ interface IIfaPriceFeed {
     /// @param _assetIndex The index of the asset
     /// @return assetInfo The price information of the asset
 
-    function getAssetInfo(uint64 _assetIndex) external returns (PriceFeed memory assetInfo);
+    function getAssetInfo(uint64 _assetIndex) external returns (PriceFeed memory assetInfo, bool exist);
 
     /// @notice Get the price information of multiple assets
     /// @param _assetIndexes The array of asset indexes
-    /// @return assetsInfo The price information of the assets
-    function getAssetsInfo(uint64[] memory _assetIndexes) external returns (PriceFeed[] memory assetsInfo);
+    /// @return assetsInfo The price information of the assets & exists to confirm if the price information of the asset exist
+    function getAssetsInfo(uint64[] memory _assetIndexes)
+        external
+        returns (PriceFeed[] memory assetsInfo, bool[] memory exists);
 
     /// @notice Retrieves pair information for a given asset pair and direction.
     /// @param _assetIndex0 Index of the first asset.
