@@ -51,8 +51,8 @@ contract BaseTest is Test {
         vm.startPrank(owner);
 
         // Deploy contracts
-        priceFeed = new IfaPriceFeed();
-        verifier = new IfaPriceFeedVerifier(relayerNode, address(priceFeed));
+        priceFeed = new IfaPriceFeed(owner);
+        verifier = new IfaPriceFeedVerifier(relayerNode, address(priceFeed), owner);
 
         // Set verifier in price feed
         priceFeed.setVerifier(address(verifier));

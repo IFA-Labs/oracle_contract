@@ -13,8 +13,8 @@ contract IfaPriceFeedVerifier is Ownable {
     address public relayerNode;
     IIfaPriceFeed public immutable IfaPriceFeed;
 
-    constructor(address _relayerNode, address _IIfaPriceFeed) {
-        _initializeOwner(msg.sender); // setting owner of contract
+    constructor(address _relayerNode, address _IIfaPriceFeed, address _owner) {
+        _initializeOwner(_owner); // setting owner of contract
         relayerNode = _relayerNode;
         IfaPriceFeed = IIfaPriceFeed(_IIfaPriceFeed);
     }
