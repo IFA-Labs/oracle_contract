@@ -5,6 +5,7 @@ import "forge-std/Test.sol";
 import "../src/IfaPriceFeedVerifier.sol";
 import "../src/Interface/IIfaPriceFeed.sol";
 import "./BaseTest.t.sol";
+import {FixedPointMathLib} from "solady-0.1.12/src/utils/FixedPointMathLib.sol";
 
 contract IfaPriceFeedTest is BaseTest {
     function setUp() public override {
@@ -73,7 +74,9 @@ contract IfaPriceFeedTest is BaseTest {
         assertEq(result.derivedPrice, expectedPrice);
         assertEq(result.decimal, MAX_DECIMAL);
         assertEq(result.lastUpdateTime, min(priceBTC.lastUpdateTime, priceETH.lastUpdateTime));
-        assertEq(result.roundDifference, int256(priceBTC.roundId) - int256(priceETH.roundId));
+        assertEq(
+            result.roundDifference, int256(FixedPointMathLib.abs(int256(priceBTC.roundId) - int256(priceETH.roundId)))
+        );
     }
 
     function testGetPairbyId_BackwardDirection() public view {
