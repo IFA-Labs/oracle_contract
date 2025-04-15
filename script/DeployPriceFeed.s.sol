@@ -24,8 +24,9 @@ contract DeployPriceFeed is Script {
         ifaPriceFeed = new IfaPriceFeed{salt: SALT_IfaPriceFeed}();
         console.log("IfaPriceFeed deployed at:", address(ifaPriceFeed));
 
-        ifaPriceFeedVerifier =
-            new IfaPriceFeedVerifier{salt: SALT_IfaPriceFeed}(address(0xdeadbeef), address(ifaPriceFeed)); //@note change the relayer address when deploying to testnet/mainnet
+        ifaPriceFeedVerifier = new IfaPriceFeedVerifier{salt: SALT_IfaPriceFeed}(
+            address(0xCCB3f2CC8592126a80B91B53eE4d7332F54d980d), address(ifaPriceFeed)
+        ); //@note change the relayer address when deploying to testnet/mainnet
         console.log("IfaPriceFeedVerifier deployed at:", address(ifaPriceFeedVerifier));
         ifaPriceFeed.setVerifier(address(ifaPriceFeedVerifier));
     }

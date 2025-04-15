@@ -11,7 +11,7 @@ dependencies/
 research/
 # Docs
 docs/
-
+coverage-html
 # Dotenv file
 .env
 .qodo

@@ -4,7 +4,7 @@ pragma solidity 0.8.29;
 
 import {IIfaPriceFeed} from "./Interface/IIfaPriceFeed.sol";
 import {Ownable} from "solady-0.1.12/src/auth/Ownable.sol";
-
+import {FixedPointMathLib} from "solady-0.1.12/src/utils/FixedPointMathLib.sol";
 /// @title IFALABS Oracle Price Feed Contract
 /// @author IFALABS
 /// @notice This contract is used for to storing the exchange rate of Assets  and calculating the price of Paira
@@ -152,15 +152,23 @@ contract IfaPriceFeed is IIfaPriceFeed, Ownable {
         uint256 _roundId1 = _assetInfo1.roundId;
         uint256 derivedPrice;
         int256 roundDifference;
-
+        if (_roundId0 >= _roundId1) {
+            roundDifference = int256(_roundId0) - int256(_roundId1);
+        } else {
+            roundDifference = int256(_roundId1) - int256(_roundId0);
+        }
         if (_direction == PairDirection.Forward) {
             // (asset0/usd) / (asset1/usd) = asset0 / asset1
             // Scaling asset decimals to MAX_DECIMAL(18) for precision
-            derivedPrice = (_scalePrice(_price0, _decimal0) * 10 ** MAX_DECIMAL) / _scalePrice(_price1, _decimal1);
-            roundDifference = int256(_roundId0) - int256(_roundId1);
+            // derivedPrice = (_scalePrice(_price0, _decimal0) * 10 ** MAX_DECIMAL) / _scalePrice(_price1, _decimal1);
+            derivedPrice = FixedPointMathLib.mulDiv(
+                _scalePrice(_price0, _decimal0), 10 ** MAX_DECIMAL, _scalePrice(_price1, _decimal1)
+            );
         } else {
-            derivedPrice = (_scalePrice(_price1, _decimal1) * 10 ** MAX_DECIMAL) / _scalePrice(_price0, _decimal0);
-            roundDifference = int256(_roundId1) - int256(_roundId0);
+            //derivedPrice = (_scalePrice(_price1, _decimal1) * 10 ** MAX_DECIMAL) / _scalePrice(_price0, _decimal0);
+            derivedPrice = FixedPointMathLib.mulDiv(
+                _scalePrice(_price1, _decimal1), 10 ** MAX_DECIMAL, _scalePrice(_price0, _decimal0)
+            );
         }
 
         return DerviedPair({
