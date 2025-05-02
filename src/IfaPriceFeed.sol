@@ -16,7 +16,7 @@ contract IfaPriceFeed is IIfaPriceFeed, Ownable {
 
     address public IfaPriceFeedVerifier;
     /// @notice Mapping of asset index to its price information
-    mapping(uint64 assetIndex => PriceFeed assetInfo) _assetInfo;
+    mapping(bytes32 assetIndex => PriceFeed assetInfo) _assetInfo;
 
     constructor(address _owner) {
         _initializeOwner(_owner); // setting owner of contract
@@ -32,14 +32,18 @@ contract IfaPriceFeed is IIfaPriceFeed, Ownable {
     /// @notice Get the price information of an asset revert if the asset index is invalid
     /// @param _assetIndex The index of the asset
     /// @return assetInfo The price information of the asset
-    function getAssetInfo(uint64 _assetIndex) external view returns (PriceFeed memory assetInfo, bool exist) {
+    function getAssetInfo(bytes32 _assetIndex) external view returns (PriceFeed memory assetInfo, bool exist) {
         return _getAssetInfo(_assetIndex);
     }
 
     /// @notice  Get the price information of an array of assets revert if any asset index is invalid
     /// @param _assetIndexes The array of asset indexes
     /// @return assetsInfo The price information of the assets
-    function getAssetsInfo(uint64[] calldata _assetIndexes) external view returns (PriceFeed[] memory, bool[] memory) {
+    function getAssetsInfo(bytes32[] calldata _assetIndexes)
+        external
+        view
+        returns (PriceFeed[] memory, bool[] memory)
+    {
         uint256 arrayLength = _assetIndexes.length;
         PriceFeed[] memory assetsInfo = new PriceFeed[](arrayLength);
         bool[] memory exists = new bool[](arrayLength);
@@ -54,7 +58,7 @@ contract IfaPriceFeed is IIfaPriceFeed, Ownable {
     /// @param _direction Direction of the pair (Forward or Backward).
     /// @return pairInfo The derived pair information.
 
-    function getPairbyId(uint64 _assetIndex0, uint64 _assetIndex1, PairDirection _direction)
+    function getPairbyId(bytes32 _assetIndex0, bytes32 _assetIndex1, PairDirection _direction)
         external
         view
         returns (DerviedPair memory pairInfo)
@@ -66,7 +70,7 @@ contract IfaPriceFeed is IIfaPriceFeed, Ownable {
     /// @param _assetIndexes0 Array of indexes for the first assets in pairs.
     /// @param _assetsIndexes1 Array of indexes for the second assets in pairs.
     /// @return pairsInfo Array of derived pair information.
-    function getPairsbyIdForward(uint64[] calldata _assetIndexes0, uint64[] calldata _assetsIndexes1)
+    function getPairsbyIdForward(bytes32[] calldata _assetIndexes0, bytes32[] calldata _assetsIndexes1)
         external
         view
         returns (DerviedPair[] memory)
@@ -89,7 +93,7 @@ contract IfaPriceFeed is IIfaPriceFeed, Ownable {
     /// @param _assetsIndexes1 Array of indexes for the second assets in pairs.
     /// @return pairsInfo Array of derived pair information.
 
-    function getPairsbyIdBackward(uint64[] calldata _assetIndexes0, uint64[] calldata _assetsIndexes1)
+    function getPairsbyIdBackward(bytes32[] calldata _assetIndexes0, bytes32[] calldata _assetsIndexes1)
         external
         view
         returns (DerviedPair[] memory)
@@ -113,8 +117,8 @@ contract IfaPriceFeed is IIfaPriceFeed, Ownable {
     /// @param _direction Array of directions for each pair (Forward or Backward).
     /// @return pairsInfo Array of derived pair information.
     function getPairsbyId(
-        uint64[] calldata _assetIndexes0,
-        uint64[] calldata _assetsIndexes1,
+        bytes32[] calldata _assetIndexes0,
+        bytes32[] calldata _assetsIndexes1,
         PairDirection[] calldata _direction
     ) external view returns (DerviedPair[] memory) {
         uint256 arrayLength = _assetIndexes0.length;
@@ -135,7 +139,7 @@ contract IfaPriceFeed is IIfaPriceFeed, Ownable {
     /// @param _assetIndex1 Index of the second asset.
     /// @param _direction Direction of the pair (Forward or Backward).
     /// @return pairInfo The derived pair information.
-    function _getPairInfo(uint64 _assetIndex0, uint64 _assetIndex1, PairDirection _direction)
+    function _getPairInfo(bytes32 _assetIndex0, bytes32 _assetIndex1, PairDirection _direction)
         internal
         view
         returns (DerviedPair memory pairInfo)
@@ -182,7 +186,7 @@ contract IfaPriceFeed is IIfaPriceFeed, Ownable {
     /// @notice Sets the price information of an asset (to be called by the verifier contract)
     /// @param _assetIndex The index of the asset
     /// @param assetInfo The price information of the asset
-    function setAssetInfo(uint64 _assetIndex, PriceFeed calldata assetInfo) external onlyVerifier {
+    function setAssetInfo(bytes32 _assetIndex, PriceFeed calldata assetInfo) external onlyVerifier {
         _setAssetInfo(_assetIndex, assetInfo);
     }
     /// @notice Sets the verifier for the price feed
@@ -197,7 +201,7 @@ contract IfaPriceFeed is IIfaPriceFeed, Ownable {
     /// @param _assetIndex The index of the asset
     /// @return assetInfo The price information of the asset
 
-    function _getAssetInfo(uint64 _assetIndex) internal view returns (PriceFeed memory assetInfo, bool exist) {
+    function _getAssetInfo(bytes32 _assetIndex) internal view returns (PriceFeed memory assetInfo, bool exist) {
         //require(_assetInfo[_assetIndex].lastUpdateTime > 0, InvalidAssetIndex(_assetIndex));
         if (_assetInfo[_assetIndex].lastUpdateTime > 0) {
             exist = true;
@@ -211,7 +215,7 @@ contract IfaPriceFeed is IIfaPriceFeed, Ownable {
     /// @notice Sets the price information of an asset
     /// @param _assetIndex The index of the asset
     /// @param assetInfo The price information of the asset
-    function _setAssetInfo(uint64 _assetIndex, PriceFeed calldata assetInfo) internal {
+    function _setAssetInfo(bytes32 _assetIndex, PriceFeed calldata assetInfo) internal {
         // price verification will be done on the  Verifier contract
         _assetInfo[_assetIndex] = assetInfo;
         emit AssetInfoSet(_assetIndex, assetInfo);

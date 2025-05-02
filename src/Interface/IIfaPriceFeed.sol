@@ -11,7 +11,7 @@ interface IIfaPriceFeed {
     /// @notice Thrown when an invalid asset index is used. i.e  asset does not exist
     /// @param _assetIndex The invalid asset index.
 
-    error InvalidAssetIndex(uint64 _assetIndex);
+    error InvalidAssetIndex(bytes32 _assetIndex);
 
     /// @notice Thrown when the length of two asset index arrays are not equal.
     /// @param _assetIndex0 The length of the first asset index array.
@@ -43,20 +43,20 @@ interface IIfaPriceFeed {
         int256 roundDifference; //  roundDifference = asset0.roundId - asset1.roundId  if Pair direction is Forward  otherwise  roundDifference = asset1.roundId  - asset0.roundId
     }
 
-    event AssetInfoSet(uint64 indexed _assetIndex, PriceFeed indexed assetInfo);
+    event AssetInfoSet(bytes32 indexed _assetIndex, PriceFeed indexed assetInfo);
     event VerifierSet(address indexed _verifier);
 
-    function setAssetInfo(uint64 _assetIndex, PriceFeed memory assetInfo) external;
+    function setAssetInfo(bytes32 _assetIndex, PriceFeed memory assetInfo) external;
     /// @notice Get the price information of an asset
     /// @param _assetIndex The index of the asset
     /// @return assetInfo The price information of the asset
 
-    function getAssetInfo(uint64 _assetIndex) external returns (PriceFeed memory assetInfo, bool exist);
+    function getAssetInfo(bytes32 _assetIndex) external returns (PriceFeed memory assetInfo, bool exist);
 
     /// @notice Get the price information of multiple assets
     /// @param _assetIndexes The array of asset indexes
     /// @return assetsInfo The price information of the assets & exists to confirm if the price information of the asset exist
-    function getAssetsInfo(uint64[] memory _assetIndexes)
+    function getAssetsInfo(bytes32[] memory _assetIndexes)
         external
         returns (PriceFeed[] memory assetsInfo, bool[] memory exists);
 
@@ -65,7 +65,7 @@ interface IIfaPriceFeed {
     /// @param _assetIndex1 Index of the second asset.
     /// @param _direction Direction of the pair (Forward or Backward).
     /// @return pairInfo The derived pair information.
-    function getPairbyId(uint64 _assetIndex0, uint64 _assetIndex1, PairDirection _direction)
+    function getPairbyId(bytes32 _assetIndex0, bytes32 _assetIndex1, PairDirection _direction)
         external
         returns (DerviedPair memory pairInfo);
 
@@ -75,8 +75,8 @@ interface IIfaPriceFeed {
     /// @param _direction Array of directions for each pair (Forward or Backward).
     /// @return pairsInfo Array of derived pair information.
     function getPairsbyId(
-        uint64[] memory _assetIndexes0,
-        uint64[] memory _assetsIndexes1,
+        bytes32[] memory _assetIndexes0,
+        bytes32[] memory _assetsIndexes1,
         PairDirection[] memory _direction
     ) external returns (DerviedPair[] memory pairsInfo);
 
@@ -84,7 +84,7 @@ interface IIfaPriceFeed {
     /// @param _assetIndexes0 Array of indexes for the first assets in pairs.
     /// @param _assetsIndexes1 Array of indexes for the second assets in pairs.
     /// @return pairsInfo Array of derived pair information.
-    function getPairsbyIdForward(uint64[] memory _assetIndexes0, uint64[] memory _assetsIndexes1)
+    function getPairsbyIdForward(bytes32[] memory _assetIndexes0, bytes32[] memory _assetsIndexes1)
         external
         returns (DerviedPair[] memory pairsInfo);
 
@@ -92,7 +92,7 @@ interface IIfaPriceFeed {
     /// @param _assetIndexes0 Array of indexes for the first assets in pairs.
     /// @param _assetsIndexes1 Array of indexes for the second assets in pairs.
     /// @return pairsInfo Array of derived pair information.
-    function getPairsbyIdBackward(uint64[] memory _assetIndexes0, uint64[] memory _assetsIndexes1)
+    function getPairsbyIdBackward(bytes32[] memory _assetIndexes0, bytes32[] memory _assetsIndexes1)
         external
         returns (DerviedPair[] memory pairsInfo);
 }

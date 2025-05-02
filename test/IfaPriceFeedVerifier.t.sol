@@ -12,7 +12,7 @@ contract IfaPriceFeedVerifierTest is BaseTest {
     // ========== submitPriceFeed Tests ==========
 
     function testSubmitPriceFeed_AuthorizedRelayer() public {
-        uint64[] memory assetIndexes = new uint64[](1);
+        bytes32[] memory assetIndexes = new bytes32[](1);
         IIfaPriceFeed.PriceFeed[] memory prices = new IIfaPriceFeed.PriceFeed[](1);
 
         assetIndexes[0] = ASSET_BTC_INDEX;
@@ -37,7 +37,7 @@ contract IfaPriceFeedVerifierTest is BaseTest {
             price: 5000000000000, // $50,000 with 8 decimals
             roundId: 1
         });
-        uint64[] memory assetIndexes = new uint64[](1);
+        bytes32[] memory assetIndexes = new bytes32[](1);
 
         IIfaPriceFeed.PriceFeed[] memory prices = new IIfaPriceFeed.PriceFeed[](1);
 
@@ -53,7 +53,7 @@ contract IfaPriceFeedVerifierTest is BaseTest {
             price: 4900000000000, // $49 ,000 with 8 decimals
             roundId: 1
         });
-        uint64[] memory assetIndexesStaled = new uint64[](1);
+        bytes32[] memory assetIndexesStaled = new bytes32[](1);
         IIfaPriceFeed.PriceFeed[] memory pricesStaled = new IIfaPriceFeed.PriceFeed[](1);
 
         assetIndexesStaled[0] = ASSET_BTC_INDEX;
@@ -70,7 +70,7 @@ contract IfaPriceFeedVerifierTest is BaseTest {
     }
 
     function testSubmitPriceFeed_UnauthorizedCaller() public {
-        uint64[] memory assetIndexes = new uint64[](1);
+        bytes32[] memory assetIndexes = new bytes32[](1);
         IIfaPriceFeed.PriceFeed[] memory prices = new IIfaPriceFeed.PriceFeed[](1);
 
         assetIndexes[0] = ASSET_BTC_INDEX;
@@ -82,7 +82,7 @@ contract IfaPriceFeedVerifierTest is BaseTest {
     }
 
     function testSubmitPriceFeed_InvalidLengths() public {
-        uint64[] memory assetIndexes = new uint64[](2);
+        bytes32[] memory assetIndexes = new bytes32[](2);
         IIfaPriceFeed.PriceFeed[] memory prices = new IIfaPriceFeed.PriceFeed[](1);
 
         assetIndexes[0] = ASSET_BTC_INDEX;

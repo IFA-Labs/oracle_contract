@@ -33,7 +33,7 @@ contract IfaPriceFeedTest is BaseTest {
     // ========== getAssetsInfo Tests ==========
 
     function testGetAssetsInfo_ValidAssets() public view {
-        uint64[] memory assetIndexes = new uint64[](2);
+        bytes32[] memory assetIndexes = new bytes32[](2);
         assetIndexes[0] = ASSET_BTC_INDEX;
         assetIndexes[1] = ASSET_ETH_INDEX;
 
@@ -45,7 +45,7 @@ contract IfaPriceFeedTest is BaseTest {
     }
 
     function testGetAssetsInfo_OneInvalidAsset() public view {
-        uint64[] memory assetIndexes = new uint64[](2);
+        bytes32[] memory assetIndexes = new bytes32[](2);
         assetIndexes[0] = ASSET_BTC_INDEX;
         assetIndexes[1] = ASSET_NONEXISTENT;
 
@@ -55,7 +55,7 @@ contract IfaPriceFeedTest is BaseTest {
     }
 
     function testGetAssetsInfo_EmptyArray() public view {
-        uint64[] memory assetIndexes = new uint64[](0);
+        bytes32[] memory assetIndexes = new bytes32[](0);
 
         (IIfaPriceFeed.PriceFeed[] memory results,) = priceFeed.getAssetsInfo(assetIndexes);
         assertEq(results.length, 0);
@@ -101,8 +101,8 @@ contract IfaPriceFeedTest is BaseTest {
     // ========== getPairsbyIdForward Tests ==========
 
     function testGetPairsbyIdForward_ValidAssets() public view {
-        uint64[] memory assetIndexes0 = new uint64[](2);
-        uint64[] memory assetIndexes1 = new uint64[](2);
+        bytes32[] memory assetIndexes0 = new bytes32[](2);
+        bytes32[] memory assetIndexes1 = new bytes32[](2);
 
         assetIndexes0[0] = ASSET_BTC_INDEX;
         assetIndexes0[1] = ASSET_ETH_INDEX;
@@ -128,8 +128,8 @@ contract IfaPriceFeedTest is BaseTest {
     }
 
     function testGetPairsbyIdForward_InvalidLengths() public {
-        uint64[] memory assetIndexes0 = new uint64[](2);
-        uint64[] memory assetIndexes1 = new uint64[](1);
+        bytes32[] memory assetIndexes0 = new bytes32[](2);
+        bytes32[] memory assetIndexes1 = new bytes32[](1);
 
         assetIndexes0[0] = ASSET_BTC_INDEX;
         assetIndexes0[1] = ASSET_ETH_INDEX;
@@ -148,8 +148,8 @@ contract IfaPriceFeedTest is BaseTest {
     // ========== getPairsbyIdBackward Tests ==========
 
     function testGetPairsbyIdBackward_ValidAssets() public view {
-        uint64[] memory assetIndexes0 = new uint64[](2);
-        uint64[] memory assetIndexes1 = new uint64[](2);
+        bytes32[] memory assetIndexes0 = new bytes32[](2);
+        bytes32[] memory assetIndexes1 = new bytes32[](2);
 
         assetIndexes0[0] = ASSET_BTC_INDEX;
         assetIndexes0[1] = ASSET_ETH_INDEX;
@@ -175,8 +175,8 @@ contract IfaPriceFeedTest is BaseTest {
     }
 
     function testGetPairsbyIdBackward_InvalidLengths() public {
-        uint64[] memory assetIndexes0 = new uint64[](2);
-        uint64[] memory assetIndexes1 = new uint64[](1);
+        bytes32[] memory assetIndexes0 = new bytes32[](2);
+        bytes32[] memory assetIndexes1 = new bytes32[](1);
 
         assetIndexes0[0] = ASSET_BTC_INDEX;
         assetIndexes0[1] = ASSET_ETH_INDEX;
@@ -195,8 +195,8 @@ contract IfaPriceFeedTest is BaseTest {
     // ========== getPairsbyId Tests ==========
 
     function testGetPairsbyId_ValidAssets() public view {
-        uint64[] memory assetIndexes0 = new uint64[](2);
-        uint64[] memory assetIndexes1 = new uint64[](2);
+        bytes32[] memory assetIndexes0 = new bytes32[](2);
+        bytes32[] memory assetIndexes1 = new bytes32[](2);
         IIfaPriceFeed.PairDirection[] memory directions = new IIfaPriceFeed.PairDirection[](2);
 
         assetIndexes0[0] = ASSET_BTC_INDEX;
@@ -226,8 +226,8 @@ contract IfaPriceFeedTest is BaseTest {
     }
 
     function testGetPairsbyId_InvalidLengths() public {
-        uint64[] memory assetIndexes0 = new uint64[](2);
-        uint64[] memory assetIndexes1 = new uint64[](2);
+        bytes32[] memory assetIndexes0 = new bytes32[](2);
+        bytes32[] memory assetIndexes1 = new bytes32[](2);
         IIfaPriceFeed.PairDirection[] memory directions = new IIfaPriceFeed.PairDirection[](1);
 
         assetIndexes0[0] = ASSET_BTC_INDEX;

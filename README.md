@@ -6,8 +6,8 @@ A decentralized oracle solution specialized for stablecoin price data across var
 ```shell
 == Logs ==
   
-  `IfaPriceFeed` deployed at: `0x73fd8C16a0F2C2a03D5c5f895f33c1D377b6931e`
-  `IfaPriceFeedVerifier` deployed at: `0x3B603b250311e3463422D9B255B3280e8Ab4422d`
+  `IfaPriceFeed` deployed at: `0x863B19fc31f656323E07A725C780fbdFfc459CBc`
+  `IfaPriceFeedVerifier` deployed at: `0x18669d2045B888f520ffaeF0Cb90E2E21485B247`
 ```
 ## Features
 
@@ -53,9 +53,9 @@ IfaPriceFeedVerifier verifier = new IfaPriceFeedVerifier(relayerNodeAddress, add
 priceFeed.setVerifier(address(verifier));
 
 // Submit price data (called by relayer node)
-uint64[] memory assetIndexes = new uint64[](2);
-assetIndexes[0] = 1; // CNGN/USD
-assetIndexes[1] = 2; // BTC/USD
+bytes32[] memory assetIndexes = new bytes32[](2);
+assetIndexes[0] =  keccak256("CNGN"); // CNGN/USD
+assetIndexes[1] =  keccak256("BTC"); // BTC/USD
 
 IIfaPriceFeed.PriceFeed[] memory prices = new IIfaPriceFeed.PriceFeed[](2);
 prices[0] = IIfaPriceFeed.PriceFeed({decimal: 8, lastUpdateTime: block.timestamp, price: 220000000, roundId: 1});
@@ -64,7 +64,7 @@ prices[1] = IIfaPriceFeed.PriceFeed({decimal: 8, lastUpdateTime: block.timestamp
 verifier.submitPriceFeed(assetIndexes, prices);
 
 // Get exchange rate (CNGN/BTC)
-(IIfaPriceFeed.DerviedPair memory pair) = priceFeed.getPairbyId(1, 2, IIfaPriceFeed.PairDirection.Forward);
+(IIfaPriceFeed.DerviedPair memory pair) = priceFeed.getPairbyId(keccak256("CNGN"),  keccak256("BTC"), IIfaPriceFeed.PairDirection.Forward);
 ```
 
 ## Code Structure / Architecture
@@ -120,93 +120,93 @@ Contract that validates and submits price data from the relayer.
 
 #### `IfaPriceFeed::getAssetInfo`
 - **Visibility:** `external view`
-- **Inputs:** `uint64 _assetIndex`
+- **Inputs:** `bytes32 _assetIndex`
 - **Outputs:** `(PriceFeed memory assetInfo, bool exist)`
 - **Description:** Returns price information for a specific asset identified by its index.
 - **Example:**
 ```solidity
-(IIfaPriceFeed.PriceFeed memory btcInfo, bool exists) = priceFeed.getAssetInfo(2);
+(IIfaPriceFeed.PriceFeed memory btcInfo, bool exists) = priceFeed.getAssetInfo( keccak256("BTC"));
 ```
 
 #### `IfaPriceFeed::getAssetsInfo`
 - **Visibility:** `external view`
-- **Inputs:** `uint64[] calldata _assetIndexes`
+- **Inputs:** `bytes32[] calldata _assetIndexes`
 - **Outputs:** `(PriceFeed[] memory assetsInfo, bool[] memory exists)`
 - **Description:** Retrieves price information for multiple assets in a single call.
 - **Example:**
 ```solidity
-uint64[] memory assets = new uint64[](2);
-assets[0] = 1; // CNGN/USD
-assets[1] = 2; // BTC/USD
+bytes32[] memory assets = new bytes32[](2);
+assets[0] = keccak256("CNGN"); // CNGN/USD
+assets[1] = keccak256("BTC"); // BTC/USD
 (IIfaPriceFeed.PriceFeed[] memory info, bool[] memory exist) = priceFeed.getAssetsInfo(assets);
 ```
 
 #### `IfaPriceFeed::getPairbyId`
 - **Visibility:** `external view`
-- **Inputs:** `uint64 _assetIndex0, uint64 _assetIndex1, PairDirection _direction`
+- **Inputs:** `bytes32 _assetIndex0, bytes32 _assetIndex1, PairDirection _direction`
 - **Outputs:** `DerviedPair memory pairInfo`
 - **Description:** Calculates the exchange rate between two assets in the specified direction.
 - **Example:**
 ```solidity
 // Get CNGN/BTC rate
 IIfaPriceFeed.DerviedPair memory pair = priceFeed.getPairbyId(
-    1, // CNGN/USD
-    2, // BTC/USD
-    IIfaPriceFeed.PairDirection.Forward
+  keccak256("CNGN"), // CNGN/USD
+  keccak256("BTC"), // BTC/USD
+  IIfaPriceFeed.PairDirection.Forward
 );
 ```
 
 #### `IfaPriceFeed::getPairsbyIdForward`
 - **Visibility:** `external view`
-- **Inputs:** `uint64[] calldata _assetIndexes0, uint64[] calldata _assetsIndexes1`
+- **Inputs:** `bytes32[] calldata _assetIndexes0, bytes32[] calldata _assetsIndexes1`
 - **Outputs:** `DerviedPair[] memory pairsInfo`
 - **Description:** Batch calculation of exchange rates between multiple asset pairs in forward direction.
 - **Example:**
 ```solidity
-uint64[] memory assets0 = new uint64[](2);
-uint64[] memory assets1 = new uint64[](2);
-assets0[0] = 1; // CNGN/USD
-assets0[1] = 3; // ETH/USD
-assets1[0] = 2; // BTC/USD
-assets1[1] = 4; // USDT/USD
+bytes32[] memory assets0 = new bytes32[](2);
+bytes32[] memory assets1 = new bytes32[](2);
+assets0[0] = keccak256("CNGN"); // CNGN/USD
+assets0[1] = keccak256("ETH"); // ETH/USD
+assets1[0] = keccak256("BTC"); // BTC/USD
+assets1[1] = keccak256("USDT"); // USDT/USD
 IIfaPriceFeed.DerviedPair[] memory pairs = priceFeed.getPairsbyIdForward(assets0, assets1);
 // Returns [CNGN/BTC, ETH/USDT]
 ```
 
 #### `IfaPriceFeed::getPairsbyIdBackward`
 - **Visibility:** `external view`
-- **Inputs:** `uint64[] calldata _assetIndexes0, uint64[] calldata _assetsIndexes1`
+- **Inputs:** `bytes32[] calldata _assetIndexes0, bytes32[] calldata _assetsIndexes1`
 - **Outputs:** `DerviedPair[] memory pairsInfo`
 - **Description:** Batch calculation of exchange rates between multiple asset pairs in backward direction.
 - **Example:**
 ```solidity
-uint64[] memory assets0 = new uint64[](2);
-uint64[] memory assets1 = new uint64[](2);
-assets0[0] = 1; // CNGN/USD
-assets0[1] = 3; // ETH/USD
-assets1[0] = 2; // BTC/USD
-assets1[1] = 4; // USDT/USD
+bytes32[] memory assets0 = new bytes32[](2);
+bytes32[] memory assets1 = new bytes32[](2);
+assets0[0] = keccak256("CNGN"); // CNGN/USD
+assets0[1] = keccak256("ETH"); // ETH/USD
+assets1[0] = keccak256("BTC"); // BTC/USD
+assets1[1] = keccak256("USDT"); // USDT/USD
 IIfaPriceFeed.DerviedPair[] memory pairs = priceFeed.getPairsbyIdBackward(assets0, assets1);
 // Returns [BTC/CNGN, USDT/ETH]
 ```
 
 #### `IfaPriceFeed::getPairsbyId`
 - **Visibility:** `external view`
-- **Inputs:** `uint64[] calldata _assetIndexes0, uint64[] calldata _assetsIndexes1, PairDirection[] calldata _direction`
+- **Inputs:** `bytes32[] calldata _assetIndexes0, bytes32[] calldata _assetsIndexes1, PairDirection[] calldata _direction`
 - **Outputs:** `DerviedPair[] memory pairsInfo`
 - **Description:** Batch calculation with custom direction for each pair.
 - **Example:**
 ```solidity
-uint64[] memory assets0 = new uint64[](2);
-uint64[] memory assets1 = new uint64[](2);
+bytes32[] memory assets0 = new bytes32[](2);
+bytes32[] memory assets1 = new bytes32[](2);
 IIfaPriceFeed.PairDirection[] memory directions = new IIfaPriceFeed.PairDirection[](2);
 
-assets0[0] = 1; // CNGN/USD
-assets1[0] = 2; // BTC/USD
+assets0[0] = keccak256("CNGN") // CNGN/USD
+assets1[0] = keccak256("BTC"); // BTC/USD
 directions[0] = IIfaPriceFeed.PairDirection.Forward;
 
-assets0[1] = 3; // ETH/USD
-assets1[1] = 4; // USDT/USD
+assets0[1] = keccak256("ETH"); // ETH/USD
+assets1[1] = keccak256("USDT"); // USDT/USD
 directions[1] = IIfaPriceFeed.PairDirection.Backward;
 
 IIfaPriceFeed.DerviedPair[] memory pairs = priceFeed.getPairsbyId(assets0, assets1, directions);
@@ -215,14 +215,14 @@ IIfaPriceFeed.DerviedPair[] memory pairs = priceFeed.getPairsbyId(assets0, asset
 
 #### `IfaPriceFeed::setAssetInfo`
 - **Visibility:** `external`
-- **Inputs:** `uint64 _assetIndex, PriceFeed calldata assetInfo`
+- **Inputs:** `bytes32 _assetIndex, PriceFeed calldata assetInfo`
 - **Outputs:** None
 - **Description:** Sets price information for an asset (only callable by the verifier).
 - **Example:**
 ```solidity
 // Can only be called by the verifier contract
 priceFeed.setAssetInfo(
-    1, // CNGN/USD
+    keccak256("CNGN"), // CNGN/USD
     IIfaPriceFeed.PriceFeed({
         decimal: 8,
         lastUpdateTime: block.timestamp,
@@ -246,14 +246,14 @@ priceFeed.setVerifier(address(verifierContract));
 
 #### `IfaPriceFeedVerifier::submitPriceFeed`
 - **Visibility:** `external`
-- **Inputs:** `uint64[] calldata _assetindex, IIfaPriceFeed.PriceFeed[] calldata _prices`
+- **Inputs:** `bytes32[] calldata _assetindex, IIfaPriceFeed.PriceFeed[] calldata _prices`
 - **Outputs:** None
 - **Description:** Submits new price data for multiple assets (only callable by relayer node).
 - **Example:**
 ```solidity
-uint64[] memory assetIndexes = new uint64[](2);
-assetIndexes[0] = 1; // CNGN/USD
-assetIndexes[1] = 2; // BTC/USD
+bytes32[] memory assetIndexes = new bytes32[](2);
+assetIndexes[0] = keccak256("CNGN"); // CNGN/USD
+assetIndexes[1] = keccak256("BTC"); // BTC/USD
 
 IIfaPriceFeed.PriceFeed[] memory prices = new IIfaPriceFeed.PriceFeed[](2);
 prices[0] = IIfaPriceFeed.PriceFeed({decimal: 8, lastUpdateTime: block.timestamp, price: 220000000, roundId: 1});
