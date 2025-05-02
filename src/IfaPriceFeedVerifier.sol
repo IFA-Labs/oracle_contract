@@ -24,14 +24,14 @@ contract IfaPriceFeedVerifier is Ownable {
         _;
     }
 
-    function submitPriceFeed(uint64[] calldata _assetindex, IIfaPriceFeed.PriceFeed[] calldata _prices)
+    function submitPriceFeed(bytes32[] calldata _assetindex, IIfaPriceFeed.PriceFeed[] calldata _prices)
         external
         onlyRelayerNode
     {
         require(_assetindex.length == _prices.length, InvalidAssetIndexorPriceLength());
 
         for (uint256 i = 0; i < _assetindex.length; i++) {
-            uint64 pair = _assetindex[i];
+            bytes32 pair = _assetindex[i];
             IIfaPriceFeed.PriceFeed calldata currentPriceFeed = _prices[i];
             uint256 currenttimestamp = currentPriceFeed.lastUpdateTime;
             (IIfaPriceFeed.PriceFeed memory prevPriceFeed,) = IfaPriceFeed.getAssetInfo(pair);

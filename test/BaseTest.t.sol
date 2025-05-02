@@ -8,10 +8,10 @@ import "../src/Interface/IIfaPriceFeed.sol";
 
 contract BaseTest is Test {
     // Constants
-    uint64 constant ASSET_BTC_INDEX = 1;
-    uint64 constant ASSET_ETH_INDEX = 2;
-    uint64 constant ASSET_CNGN_INDEX = 3;
-    uint64 constant ASSET_NONEXISTENT = 999;
+    bytes32 constant ASSET_BTC_INDEX = keccak256("BTC");
+    bytes32 constant ASSET_ETH_INDEX = keccak256("ETH");
+    bytes32 constant ASSET_CNGN_INDEX = keccak256("CNGN");
+    bytes32 constant ASSET_NONEXISTENT = keccak256("NONE");
     uint8 constant MAX_DECIMAL = 18;
 
     // Contracts
@@ -62,7 +62,7 @@ contract BaseTest is Test {
 
     // Helper function to initialize asset prices
     function initializeAssetPrices() internal {
-        uint64[] memory assetIndexes = new uint64[](3);
+        bytes32[] memory assetIndexes = new bytes32[](3);
         IIfaPriceFeed.PriceFeed[] memory prices = new IIfaPriceFeed.PriceFeed[](3);
 
         assetIndexes[0] = ASSET_BTC_INDEX;
