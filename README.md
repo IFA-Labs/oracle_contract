@@ -58,8 +58,8 @@ assetIndexes[0] =  keccak256("CNGN"); // CNGN/USD
 assetIndexes[1] =  keccak256("BTC"); // BTC/USD
 
 IIfaPriceFeed.PriceFeed[] memory prices = new IIfaPriceFeed.PriceFeed[](2);
-prices[0] = IIfaPriceFeed.PriceFeed({decimal: 8, lastUpdateTime: block.timestamp, price: 220000000, roundId: 1});
-prices[1] = IIfaPriceFeed.PriceFeed({decimal: 8, lastUpdateTime: block.timestamp, price: 6800000000000, roundId: 1});
+prices[0] = IIfaPriceFeed.PriceFeed({decimal: -18, lastUpdateTime: block.timestamp, price: 2200000000000000000000000000, roundId: 1});
+prices[1] = IIfaPriceFeed.PriceFeed({decimal: -18, lastUpdateTime: block.timestamp, price: 68000000000000000000000000000000, roundId: 1});
 
 verifier.submitPriceFeed(assetIndexes, prices);
 
@@ -93,7 +93,7 @@ Defines the structure and functionality for the price feed system.
   - `roundId`: Current round identifier
 
 - **`DerviedPair`**: Represents exchange rate between two assets
-  - `decimal`: Always set to MAX_DECIMAL (18)
+  - `decimal`: Always set to MAX_DECIMAL_NEGATIVE (-30)
   - `lastUpdateTime`: Min timestamp of the two assets
   - `derivedPrice`: Calculated exchange rate
   - `roundDifference`: Difference between round IDs
@@ -108,7 +108,8 @@ Main contract for storing asset prices and calculating exchange rates.
 
 #### Key Constants:
 
-- `MAX_DECIMAL`: Set to 18 for high precision in calculations
+- `MAX_DECIMAL`:          Set to 30 for high precision in calculations
+- `MAX_DECIMAL_NEGATIVE`: Set to -30 for high precision in calculations
 
 ### **`IfaPriceFeedVerifier`**
 
@@ -224,9 +225,9 @@ IIfaPriceFeed.DerviedPair[] memory pairs = priceFeed.getPairsbyId(assets0, asset
 priceFeed.setAssetInfo(
     keccak256("CNGN"), // CNGN/USD
     IIfaPriceFeed.PriceFeed({
-        decimal: 8,
+        decimal: -18,
         lastUpdateTime: block.timestamp,
-        price: 220000000,
+        price: 2200000000000000000000000000,
         roundId: 1
     })
 );
@@ -256,8 +257,8 @@ assetIndexes[0] = keccak256("CNGN"); // CNGN/USD
 assetIndexes[1] = keccak256("BTC"); // BTC/USD
 
 IIfaPriceFeed.PriceFeed[] memory prices = new IIfaPriceFeed.PriceFeed[](2);
-prices[0] = IIfaPriceFeed.PriceFeed({decimal: 8, lastUpdateTime: block.timestamp, price: 220000000, roundId: 1});
-prices[1] = IIfaPriceFeed.PriceFeed({decimal: 8, lastUpdateTime: block.timestamp, price: 6800000000000, roundId: 1});
+prices[0] = IIfaPriceFeed.PriceFeed({decimal: -18, lastUpdateTime: block.timestamp, price: 2200000000000000000000000000, roundId: 1});
+prices[1] = IIfaPriceFeed.PriceFeed({decimal: -18, lastUpdateTime: block.timestamp, price: 68000000000000000000000000000000, roundId: 1});
 
 verifier.submitPriceFeed(assetIndexes, prices);
 ```
