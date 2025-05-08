@@ -265,9 +265,7 @@ library FixedPointMathLib {
             // - The `1e18 / 2**96` factor for base conversion.
             // We do this all at once, with an intermediate result in `2**213`
             // basis, so the final right shift is always by a positive amount.
-            r = int256(
-                (uint256(r) * 3822833074963236453042738258902158003155416615667) >> uint256(195 - k)
-            );
+            r = int256((uint256(r) * 3822833074963236453042738258902158003155416615667) >> uint256(195 - k));
         }
     }
 
@@ -438,11 +436,7 @@ library FixedPointMathLib {
     /*.•°:°.´+˚.*°.˚:*.´•*.+°.•°:´*.´•*.•°.•°:°.´:•˚°.*°.˚:*.´+°.•*/
 
     /// @dev Returns `a * b == x * y`, with full precision.
-    function fullMulEq(uint256 a, uint256 b, uint256 x, uint256 y)
-        internal
-        pure
-        returns (bool result)
-    {
+    function fullMulEq(uint256 a, uint256 b, uint256 x, uint256 y) internal pure returns (bool result) {
         /// @solidity memory-safe-assembly
         assembly {
             result := and(eq(mul(a, b), mul(x, y)), eq(mulmod(x, y, not(0)), mulmod(a, b, not(0))))
@@ -514,11 +508,7 @@ library FixedPointMathLib {
     /// @dev Calculates `floor(x * y / d)` with full precision.
     /// Behavior is undefined if `d` is zero or the final result cannot fit in 256 bits.
     /// Performs the full 512 bit calculation regardless.
-    function fullMulDivUnchecked(uint256 x, uint256 y, uint256 d)
-        internal
-        pure
-        returns (uint256 z)
-    {
+    function fullMulDivUnchecked(uint256 x, uint256 y, uint256 d) internal pure returns (uint256 z) {
         /// @solidity memory-safe-assembly
         assembly {
             z := mul(x, y)
@@ -534,10 +524,7 @@ library FixedPointMathLib {
             inv := mul(inv, sub(2, mul(d, inv)))
             inv := mul(inv, sub(2, mul(d, inv)))
             z :=
-                mul(
-                    or(mul(sub(p1, gt(r, z)), add(div(sub(0, t), t), 1)), div(sub(z, r), t)),
-                    mul(sub(2, mul(d, inv)), inv)
-                )
+                mul(or(mul(sub(p1, gt(r, z)), add(div(sub(0, t), t), 1)), div(sub(z, r), t)), mul(sub(2, mul(d, inv)), inv))
         }
     }
 
@@ -1129,11 +1116,7 @@ library FixedPointMathLib {
     }
 
     /// @dev Returns `x`, bounded to `minValue` and `maxValue`.
-    function clamp(uint256 x, uint256 minValue, uint256 maxValue)
-        internal
-        pure
-        returns (uint256 z)
-    {
+    function clamp(uint256 x, uint256 minValue, uint256 maxValue) internal pure returns (uint256 z) {
         /// @solidity memory-safe-assembly
         assembly {
             z := xor(x, mul(xor(x, minValue), gt(minValue, x)))
@@ -1166,11 +1149,7 @@ library FixedPointMathLib {
     /// with `t` clamped between `begin` and `end` (inclusive).
     /// Agnostic to the order of (`a`, `b`) and (`end`, `begin`).
     /// If `begins == end`, returns `t <= begin ? a : b`.
-    function lerp(uint256 a, uint256 b, uint256 t, uint256 begin, uint256 end)
-        internal
-        pure
-        returns (uint256)
-    {
+    function lerp(uint256 a, uint256 b, uint256 t, uint256 begin, uint256 end) internal pure returns (uint256) {
         if (begin > end) (t, begin, end) = (~t, ~begin, ~end);
         if (t <= begin) return a;
         if (t >= end) return b;
@@ -1184,11 +1163,7 @@ library FixedPointMathLib {
     /// with `t` clamped between `begin` and `end` (inclusive).
     /// Agnostic to the order of (`a`, `b`) and (`end`, `begin`).
     /// If `begins == end`, returns `t <= begin ? a : b`.
-    function lerp(int256 a, int256 b, int256 t, int256 begin, int256 end)
-        internal
-        pure
-        returns (int256)
-    {
+    function lerp(int256 a, int256 b, int256 t, int256 begin, int256 end) internal pure returns (int256) {
         if (begin > end) (t, begin, end) = (~t, ~begin, ~end);
         if (t <= begin) return a;
         if (t >= end) return b;
