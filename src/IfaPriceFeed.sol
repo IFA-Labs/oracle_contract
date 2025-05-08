@@ -12,7 +12,9 @@ import {FixedPointMathLib} from "solady-0.1.12/src/utils/FixedPointMathLib.sol";
 /// @dev  what is a pair? A pair is a combination of two asset with respect to each out  e.g CNGN/BTC
 
 contract IfaPriceFeed is IIfaPriceFeed, Ownable {
-    uint8 constant MAX_DECIMAL = 18; //@follow-up  i meant increase since some pairs will be very small(e.g CNGN/BTC) and some will be very large(e.g BTC/CNGN)
+    uint8 constant MAX_DECIMAL = 30;
+    int8 constant MAX_DECIMAL_NEGATIVE = -30;
+    uint256 constant MAX_INT256 = 57896044618658097711785492504343953926634992332820282019728792003956564819967;
 
     address public IfaPriceFeedVerifier;
     /// @notice Mapping of asset index to its price information
@@ -148,27 +150,31 @@ contract IfaPriceFeed is IIfaPriceFeed, Ownable {
         (PriceFeed memory _assetInfo1, bool exist1) = _getAssetInfo(_assetIndex1);
         if (!exist0) revert InvalidAssetIndex(_assetIndex0);
         if (!exist1) revert InvalidAssetIndex(_assetIndex1);
-        uint256 _price0 = _assetInfo0.price;
-        uint256 _price1 = _assetInfo1.price;
-        uint8 _decimal0 = _assetInfo0.decimal;
-        uint8 _decimal1 = _assetInfo1.decimal;
-        uint256 _roundId0 = _assetInfo0.roundId;
-        uint256 _roundId1 = _assetInfo1.roundId;
+        int256 _price0 = _assetInfo0.price;
+        int256 _price1 = _assetInfo1.price;
+        int8 _decimal0 = _assetInfo0.decimal;
+        int8 _decimal1 = _assetInfo1.decimal;
+
         uint256 derivedPrice;
         int256 roundDifference;
-        if (_roundId0 >= _roundId1) {
-            roundDifference = int256(_roundId0) - int256(_roundId1);
-        } else {
-            roundDifference = int256(_roundId1) - int256(_roundId0);
+        {
+            int256 _roundId0 = _assetInfo0.roundId;
+            int256 _roundId1 = _assetInfo1.roundId;
+            if (_roundId0 >= _roundId1) {
+                roundDifference = int256(_roundId0) - int256(_roundId1);
+            } else {
+                roundDifference = int256(_roundId1) - int256(_roundId0);
+            }
         }
         if (_direction == PairDirection.Forward) {
             // (asset0/usd) / (asset1/usd) = asset0 / asset1
-            // Scaling asset decimals to MAX_DECIMAL(18) for precision
+            // Scaling asset decimals to MAX_DECIMAL(30) for precision
             // derivedPrice = (_scalePrice(_price0, _decimal0) * 10 ** MAX_DECIMAL) / _scalePrice(_price1, _decimal1);
             derivedPrice = FixedPointMathLib.mulDiv(
                 _scalePrice(_price0, _decimal0), 10 ** MAX_DECIMAL, _scalePrice(_price1, _decimal1)
             );
         } else {
+            // (asset1/usd) / (asset0/usd) = asset1 /asset0
             //derivedPrice = (_scalePrice(_price1, _decimal1) * 10 ** MAX_DECIMAL) / _scalePrice(_price0, _decimal0);
             derivedPrice = FixedPointMathLib.mulDiv(
                 _scalePrice(_price1, _decimal1), 10 ** MAX_DECIMAL, _scalePrice(_price0, _decimal0)
@@ -176,7 +182,7 @@ contract IfaPriceFeed is IIfaPriceFeed, Ownable {
         }
 
         return DerviedPair({
-            decimal: MAX_DECIMAL,
+            decimal: MAX_DECIMAL_NEGATIVE,
             lastUpdateTime: _min(_assetInfo0.lastUpdateTime, _assetInfo1.lastUpdateTime),
             derivedPrice: derivedPrice,
             roundDifference: roundDifference
@@ -238,8 +244,11 @@ contract IfaPriceFeed is IIfaPriceFeed, Ownable {
     /// @param decimal number of decimals that the pair info supports
     /// @return the scaled prices of the pair
 
-    function _scalePrice(uint256 price, uint256 decimal) internal pure returns (uint256) {
-        return price * 10 ** (MAX_DECIMAL - decimal);
+    function _scalePrice(int256 price, int8 decimal) internal pure returns (uint256) {
+        uint256 scalePrice = uint256(price) * 10 ** (MAX_DECIMAL - uint8(-decimal));
+        require(scalePrice <= MAX_INT256);
+        require(scalePrice > uint256(price));
+        return scalePrice;
     }
     ///@dev Override to return true to prevent double-initialization.
 
