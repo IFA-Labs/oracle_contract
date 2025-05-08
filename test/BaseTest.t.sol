@@ -12,7 +12,8 @@ contract BaseTest is Test {
     bytes32 constant ASSET_ETH_INDEX = keccak256("ETH");
     bytes32 constant ASSET_CNGN_INDEX = keccak256("CNGN");
     bytes32 constant ASSET_NONEXISTENT = keccak256("NONE");
-    uint8 constant MAX_DECIMAL = 18;
+    uint8 constant MAX_DECIMAL = 30;
+    int8 constant MAX_DECIMAL_NEGATIVE = -30;
 
     // Contracts
     IfaPriceFeed public priceFeed;
@@ -27,23 +28,23 @@ contract BaseTest is Test {
 
     // Sample price data
     IIfaPriceFeed.PriceFeed priceBTC = IIfaPriceFeed.PriceFeed({
-        decimal: 8,
-        lastUpdateTime: block.timestamp,
-        price: 5000000000000, // $50,000 with 8 decimals
+        decimal: -18,
+        lastUpdateTime: uint64(block.timestamp),
+        price: 5000000000000 * 10e10, // $50,000 with 18 decimals
         roundId: 1
     });
 
     IIfaPriceFeed.PriceFeed priceETH = IIfaPriceFeed.PriceFeed({
-        decimal: 8,
-        lastUpdateTime: block.timestamp,
-        price: 300000000000, // $3,000 with 8 decimals
+        decimal: -18,
+        lastUpdateTime: uint64(block.timestamp),
+        price: 300000000000 * 10e10, // $3,000 with 18 decimals
         roundId: 2
     });
 
     IIfaPriceFeed.PriceFeed priceCNGN = IIfaPriceFeed.PriceFeed({
-        decimal: 8,
-        lastUpdateTime: block.timestamp,
-        price: 150000, // $0.0015 with 8 decimals
+        decimal: -18,
+        lastUpdateTime: uint64(block.timestamp),
+        price: 150000 * 10e10, // $0.0015 with 18 decimals
         roundId: 3
     });
 

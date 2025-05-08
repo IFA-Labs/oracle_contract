@@ -30,14 +30,14 @@ interface IIfaPriceFeed {
     error InvalidVerifier(address _verifier);
 
     struct PriceFeed {
-        uint8 decimal;
-        uint256 lastUpdateTime;
-        uint256 price;
-        uint256 roundId;
+        int256 price;
+        int8 decimal;
+        uint64 lastUpdateTime;
+        int256 roundId;
     }
 
     struct DerviedPair {
-        uint8 decimal; // DerviedPair is always  MAX_DECIMAL(18)
+        int8 decimal; // DerviedPair is always  MAX_DECIMAL(-30)
         uint256 lastUpdateTime; // the  min of  asset0.lastUpdateTime  and asset1.lastUpdateTime
         uint256 derivedPrice;
         int256 roundDifference; //  roundDifference = asset0.roundId - asset1.roundId  if Pair direction is Forward  otherwise  roundDifference = asset1.roundId  - asset0.roundId
