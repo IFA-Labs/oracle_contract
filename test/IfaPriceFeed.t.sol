@@ -68,11 +68,11 @@ contract IfaPriceFeedTest is BaseTest {
             priceFeed.getPairbyId(ASSET_BTC_INDEX, ASSET_ETH_INDEX, IIfaPriceFeed.PairDirection.Forward);
 
         // BTC/ETH price should be 50000/3000 = 16.67 (with MAX_DECIMAL decimals)
-        uint256 expectedPrice = (priceBTC.price * 10 ** (MAX_DECIMAL + (MAX_DECIMAL - priceBTC.decimal)))
-            / (priceETH.price * 10 ** (MAX_DECIMAL - priceETH.decimal));
+        uint256 expectedPrice = (_scalePrice(priceBTC.price, priceBTC.decimal) * 10 ** MAX_DECIMAL)
+            / _scalePrice(priceETH.price, priceETH.decimal);
 
         assertEq(result.derivedPrice, expectedPrice);
-        assertEq(result.decimal, MAX_DECIMAL);
+        assertEq(result.decimal, MAX_DECIMAL_NEGATIVE);
         assertEq(result.lastUpdateTime, min(priceBTC.lastUpdateTime, priceETH.lastUpdateTime));
         assertEq(
             result.roundDifference, int256(FixedPointMathLib.abs(int256(priceBTC.roundId) - int256(priceETH.roundId)))
@@ -84,11 +84,11 @@ contract IfaPriceFeedTest is BaseTest {
             priceFeed.getPairbyId(ASSET_BTC_INDEX, ASSET_ETH_INDEX, IIfaPriceFeed.PairDirection.Backward);
 
         // ETH/BTC price should be 3000/50000 = 0.06 (with MAX_DECIMAL decimals)
-        uint256 expectedPrice = (priceETH.price * 10 ** (MAX_DECIMAL + (MAX_DECIMAL - priceETH.decimal)))
-            / (priceBTC.price * 10 ** (MAX_DECIMAL - priceBTC.decimal));
+        uint256 expectedPrice = (_scalePrice(priceETH.price, priceETH.decimal) * 10 ** MAX_DECIMAL)
+            / _scalePrice(priceBTC.price, priceBTC.decimal);
 
         assertEq(result.derivedPrice, expectedPrice);
-        assertEq(result.decimal, MAX_DECIMAL);
+        assertEq(result.decimal, MAX_DECIMAL_NEGATIVE);
         assertEq(result.lastUpdateTime, min(priceBTC.lastUpdateTime, priceETH.lastUpdateTime));
         assertEq(result.roundDifference, int256(priceETH.roundId) - int256(priceBTC.roundId));
     }
@@ -115,15 +115,17 @@ contract IfaPriceFeedTest is BaseTest {
         assertEq(results.length, 2);
 
         // First pair: BTC/ETH
-        uint256 expectedPrice1 = (priceBTC.price * 10 ** (MAX_DECIMAL + (MAX_DECIMAL - priceBTC.decimal)))
-            / (priceETH.price * 10 ** (MAX_DECIMAL - priceETH.decimal));
 
+        uint256 expectedPrice1 = (_scalePrice(priceBTC.price, priceBTC.decimal) * 10 ** MAX_DECIMAL)
+            / _scalePrice(priceETH.price, priceETH.decimal);
+        assertEq(results[0].derivedPrice, expectedPrice1);
         assertEq(results[0].derivedPrice, expectedPrice1);
 
         // Second pair: ETH/CNGN
-        uint256 expectedPrice2 = (priceETH.price * 10 ** (MAX_DECIMAL + (MAX_DECIMAL - priceETH.decimal)))
-            / (priceCNGN.price * 10 ** (MAX_DECIMAL - priceCNGN.decimal));
 
+        uint256 expectedPrice2 = (_scalePrice(priceETH.price, priceETH.decimal) * 10 ** MAX_DECIMAL)
+            / _scalePrice(priceCNGN.price, priceCNGN.decimal);
+        assertEq(results[1].derivedPrice, expectedPrice2);
         assertEq(results[1].derivedPrice, expectedPrice2);
     }
 
@@ -162,15 +164,15 @@ contract IfaPriceFeedTest is BaseTest {
         assertEq(results.length, 2);
 
         // First pair: ETH/BTC
-        uint256 expectedPrice1 = (priceETH.price * 10 ** (MAX_DECIMAL + (MAX_DECIMAL - priceETH.decimal)))
-            / (priceBTC.price * 10 ** (MAX_DECIMAL - priceBTC.decimal));
 
+        uint256 expectedPrice1 = (_scalePrice(priceETH.price, priceETH.decimal) * 10 ** MAX_DECIMAL)
+            / _scalePrice(priceBTC.price, priceBTC.decimal);
         assertEq(results[0].derivedPrice, expectedPrice1);
 
         // Second pair: CNGN/ETH
-        uint256 expectedPrice2 = (priceCNGN.price * 10 ** (MAX_DECIMAL + (MAX_DECIMAL - priceCNGN.decimal)))
-            / (priceETH.price * 10 ** (MAX_DECIMAL - priceETH.decimal));
 
+        uint256 expectedPrice2 = (_scalePrice(priceCNGN.price, priceCNGN.decimal) * 10 ** MAX_DECIMAL)
+            / _scalePrice(priceETH.price, priceETH.decimal);
         assertEq(results[1].derivedPrice, expectedPrice2);
     }
 
@@ -213,15 +215,15 @@ contract IfaPriceFeedTest is BaseTest {
         assertEq(results.length, 2);
 
         // First pair: BTC/ETH (Forward)
-        uint256 expectedPrice1 = (priceBTC.price * 10 ** (MAX_DECIMAL + (MAX_DECIMAL - priceBTC.decimal)))
-            / (priceETH.price * 10 ** (MAX_DECIMAL - priceETH.decimal));
+        uint256 expectedPrice1 = (_scalePrice(priceBTC.price, priceBTC.decimal) * 10 ** MAX_DECIMAL)
+            / _scalePrice(priceETH.price, priceETH.decimal);
 
         assertEq(results[0].derivedPrice, expectedPrice1);
 
         // Second pair: CNGN/ETH (Backward)
-        uint256 expectedPrice2 = (priceCNGN.price * 10 ** (MAX_DECIMAL + (MAX_DECIMAL - priceCNGN.decimal)))
-            / (priceETH.price * 10 ** (MAX_DECIMAL - priceETH.decimal));
 
+        uint256 expectedPrice2 = (_scalePrice(priceCNGN.price, priceCNGN.decimal) * 10 ** MAX_DECIMAL)
+            / _scalePrice(priceETH.price, priceETH.decimal);
         assertEq(results[1].derivedPrice, expectedPrice2);
     }
 
@@ -254,9 +256,9 @@ contract IfaPriceFeedTest is BaseTest {
 
     function testSetAssetInfo_ValidVerifier() public {
         IIfaPriceFeed.PriceFeed memory newPrice = IIfaPriceFeed.PriceFeed({
-            decimal: 10,
-            lastUpdateTime: block.timestamp + 100,
-            price: 5200000000000, // $52,000 with 10 decimals
+            decimal: -18,
+            lastUpdateTime: uint64(block.timestamp) + 100,
+            price: 5200000000000 * 10e10, // $52,000 with 10 decimals
             roundId: 5
         });
 
@@ -275,9 +277,9 @@ contract IfaPriceFeedTest is BaseTest {
 
     function testSetAssetInfo_UnauthorizedCaller() public {
         IIfaPriceFeed.PriceFeed memory newPrice = IIfaPriceFeed.PriceFeed({
-            decimal: 10,
-            lastUpdateTime: block.timestamp + 100,
-            price: 5200000000000,
+            decimal: -18,
+            lastUpdateTime: uint64(block.timestamp) + 100,
+            price: 5200000000000 * 10e10,
             roundId: 5
         });
 
@@ -312,9 +314,9 @@ contract IfaPriceFeedTest is BaseTest {
 
     function testSetAssetInfo_EventEmission() public {
         IIfaPriceFeed.PriceFeed memory newPrice = IIfaPriceFeed.PriceFeed({
-            decimal: 10,
-            lastUpdateTime: block.timestamp + 100,
-            price: 5200000000000,
+            decimal: -18,
+            lastUpdateTime: uint64(block.timestamp) + 100,
+            price: 5200000000000 * 10e10,
             roundId: 5
         });
 
@@ -339,5 +341,11 @@ contract IfaPriceFeedTest is BaseTest {
 
     function min(uint256 a, uint256 b) internal pure returns (uint256) {
         return a < b ? a : b;
+    }
+
+    function _scalePrice(int256 price, int8 decimal) internal pure returns (uint256) {
+        uint256 scalePrice = uint256(price) * 10 ** (MAX_DECIMAL - uint8(-decimal));
+        require(scalePrice > uint256(price));
+        return scalePrice;
     }
 }
