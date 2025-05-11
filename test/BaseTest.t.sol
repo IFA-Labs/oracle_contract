@@ -30,22 +30,19 @@ contract BaseTest is Test {
     IIfaPriceFeed.PriceFeed priceBTC = IIfaPriceFeed.PriceFeed({
         decimal: -18,
         lastUpdateTime: uint64(block.timestamp),
-        price: 5000000000000 * 10e10, // $50,000 with 18 decimals
-        roundId: 1
+        price: 5000000000000 * 10e10 // $50,000 with 18 decimals
     });
 
     IIfaPriceFeed.PriceFeed priceETH = IIfaPriceFeed.PriceFeed({
         decimal: -18,
         lastUpdateTime: uint64(block.timestamp),
-        price: 300000000000 * 10e10, // $3,000 with 18 decimals
-        roundId: 2
+        price: 300000000000 * 10e10 // $3,000 with 18 decimals
     });
 
     IIfaPriceFeed.PriceFeed priceCNGN = IIfaPriceFeed.PriceFeed({
         decimal: -18,
         lastUpdateTime: uint64(block.timestamp),
-        price: 150000 * 10e10, // $0.0015 with 18 decimals
-        roundId: 3
+        price: 150000 * 10e10 // $0.0015 with 18 decimals
     });
 
     function setUp() public virtual {

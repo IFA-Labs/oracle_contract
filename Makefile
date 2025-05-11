@@ -20,3 +20,19 @@ deploy-base-sepolia:
 		--etherscan-api-key $(BASESCAN_API_KEY) \
 		--verify \
 		--broadcast
+deploy-chiado:
+	@forge script script/DeployPriceFeed.s.sol:DeployPriceFeed \
+		--rpc-url $(CHIADO_RPC_URL) \
+		--private-key $(private_key) \
+		--verify \
+		--verifier blockscout \
+		--verifier-url https://gnosis-chiado.blockscout.com/api/ \
+		--broadcast
+deploy-gnosis:
+	@forge script script/DeployPriceFeed.s.sol:DeployPriceFeed \
+		--rpc-url $(GNOSIS_RPC_URL) \
+		--private-key $(private_key) \
+		--verify \
+		--verifier blockscout \
+		--verifier-url https://gnosis.blockscout.com/api/ \
+		--broadcast

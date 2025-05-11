@@ -156,16 +156,7 @@ contract IfaPriceFeed is IIfaPriceFeed, Ownable {
         int8 _decimal1 = _assetInfo1.decimal;
 
         uint256 derivedPrice;
-        int256 roundDifference;
-        {
-            int256 _roundId0 = _assetInfo0.roundId;
-            int256 _roundId1 = _assetInfo1.roundId;
-            if (_roundId0 >= _roundId1) {
-                roundDifference = int256(_roundId0) - int256(_roundId1);
-            } else {
-                roundDifference = int256(_roundId1) - int256(_roundId0);
-            }
-        }
+
         if (_direction == PairDirection.Forward) {
             // (asset0/usd) / (asset1/usd) = asset0 / asset1
             // Scaling asset decimals to MAX_DECIMAL(30) for precision
@@ -184,8 +175,7 @@ contract IfaPriceFeed is IIfaPriceFeed, Ownable {
         return DerviedPair({
             decimal: MAX_DECIMAL_NEGATIVE,
             lastUpdateTime: _min(_assetInfo0.lastUpdateTime, _assetInfo1.lastUpdateTime),
-            derivedPrice: derivedPrice,
-            roundDifference: roundDifference
+            derivedPrice: derivedPrice
         });
     }
 

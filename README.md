@@ -6,8 +6,8 @@ A decentralized oracle solution specialized for stablecoin price data across var
 ```shell
 == Logs ==
   
-  `IfaPriceFeed` deployed at: `0x863B19fc31f656323E07A725C780fbdFfc459CBc`
-  `IfaPriceFeedVerifier` deployed at: `0x18669d2045B888f520ffaeF0Cb90E2E21485B247`
+  `IfaPriceFeed` deployed at: `0xbF2ae81D8Adf3AA22401C4cC4f0116E936e1025b`
+  `IfaPriceFeedVerifier` deployed at: `0xC08CbF336cC0D7163Ef260bF69137c8cA7AF2F3a`
 ```
 ## Features
 
