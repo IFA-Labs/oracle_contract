@@ -27,15 +27,13 @@ contract IfaPriceFeedVerifierTest is BaseTest {
         assertEq(updatedPrice.decimal, priceBTC.decimal);
         assertEq(updatedPrice.lastUpdateTime, priceBTC.lastUpdateTime);
         assertEq(updatedPrice.price, priceBTC.price);
-        assertEq(updatedPrice.roundId, priceBTC.roundId);
     }
 
     function testSubmitPriceFeed_AuthorizedRelayer_StaleData() public {
         IIfaPriceFeed.PriceFeed memory _priceBTC = IIfaPriceFeed.PriceFeed({
             decimal: 8,
             lastUpdateTime: 36000,
-            price: 5000000000000, // $50,000 with 8 decimals
-            roundId: 1
+            price: 5000000000000 // $50,000 with 8 decimals
         });
         bytes32[] memory assetIndexes = new bytes32[](1);
 
@@ -50,8 +48,7 @@ contract IfaPriceFeedVerifierTest is BaseTest {
         IIfaPriceFeed.PriceFeed memory priceBTCStale = IIfaPriceFeed.PriceFeed({
             decimal: 8,
             lastUpdateTime: 1,
-            price: 4900000000000, // $49 ,000 with 8 decimals
-            roundId: 1
+            price: 4900000000000 // $49 ,000 with 8 decimals
         });
         bytes32[] memory assetIndexesStaled = new bytes32[](1);
         IIfaPriceFeed.PriceFeed[] memory pricesStaled = new IIfaPriceFeed.PriceFeed[](1);
@@ -66,7 +63,6 @@ contract IfaPriceFeedVerifierTest is BaseTest {
         assertEq(updatedPrice.decimal, _priceBTC.decimal);
         assertEq(updatedPrice.lastUpdateTime, _priceBTC.lastUpdateTime);
         assertEq(updatedPrice.price, _priceBTC.price);
-        assertEq(updatedPrice.roundId, _priceBTC.roundId);
     }
 
     function testSubmitPriceFeed_UnauthorizedCaller() public {
