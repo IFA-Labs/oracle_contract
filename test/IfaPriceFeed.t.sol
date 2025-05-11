@@ -22,7 +22,6 @@ contract IfaPriceFeedTest is BaseTest {
         assertEq(result.price, priceBTC.price);
         assertEq(result.decimal, priceBTC.decimal);
         assertEq(result.lastUpdateTime, priceBTC.lastUpdateTime);
-        assertEq(result.roundId, priceBTC.roundId);
     }
 
     function testGetAssetInfo_InvalidAsset() public view {
@@ -74,9 +73,6 @@ contract IfaPriceFeedTest is BaseTest {
         assertEq(result.derivedPrice, expectedPrice);
         assertEq(result.decimal, MAX_DECIMAL_NEGATIVE);
         assertEq(result.lastUpdateTime, min(priceBTC.lastUpdateTime, priceETH.lastUpdateTime));
-        assertEq(
-            result.roundDifference, int256(FixedPointMathLib.abs(int256(priceBTC.roundId) - int256(priceETH.roundId)))
-        );
     }
 
     function testGetPairbyId_BackwardDirection() public view {
@@ -90,7 +86,6 @@ contract IfaPriceFeedTest is BaseTest {
         assertEq(result.derivedPrice, expectedPrice);
         assertEq(result.decimal, MAX_DECIMAL_NEGATIVE);
         assertEq(result.lastUpdateTime, min(priceBTC.lastUpdateTime, priceETH.lastUpdateTime));
-        assertEq(result.roundDifference, int256(priceETH.roundId) - int256(priceBTC.roundId));
     }
 
     function testGetPairbyId_OneInvalidAsset() public {
@@ -258,8 +253,7 @@ contract IfaPriceFeedTest is BaseTest {
         IIfaPriceFeed.PriceFeed memory newPrice = IIfaPriceFeed.PriceFeed({
             decimal: -18,
             lastUpdateTime: uint64(block.timestamp) + 100,
-            price: 5200000000000 * 10e10, // $52,000 with 10 decimals
-            roundId: 5
+            price: 5200000000000 * 10e10 // $52,000 with 10 decimals
         });
 
         // Call from verifier directly to test
@@ -272,15 +266,13 @@ contract IfaPriceFeedTest is BaseTest {
         assertEq(updatedPrice.decimal, newPrice.decimal);
         assertEq(updatedPrice.lastUpdateTime, newPrice.lastUpdateTime);
         assertEq(updatedPrice.price, newPrice.price);
-        assertEq(updatedPrice.roundId, newPrice.roundId);
     }
 
     function testSetAssetInfo_UnauthorizedCaller() public {
         IIfaPriceFeed.PriceFeed memory newPrice = IIfaPriceFeed.PriceFeed({
             decimal: -18,
             lastUpdateTime: uint64(block.timestamp) + 100,
-            price: 5200000000000 * 10e10,
-            roundId: 5
+            price: 5200000000000 * 10e10
         });
 
         // Try to call from non-verifier address
@@ -316,8 +308,7 @@ contract IfaPriceFeedTest is BaseTest {
         IIfaPriceFeed.PriceFeed memory newPrice = IIfaPriceFeed.PriceFeed({
             decimal: -18,
             lastUpdateTime: uint64(block.timestamp) + 100,
-            price: 5200000000000 * 10e10,
-            roundId: 5
+            price: 5200000000000 * 10e10
         });
 
         // Test for event emission

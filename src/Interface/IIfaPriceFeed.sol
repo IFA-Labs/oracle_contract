@@ -33,14 +33,12 @@ interface IIfaPriceFeed {
         int256 price;
         int8 decimal;
         uint64 lastUpdateTime;
-        int256 roundId;
     }
 
     struct DerviedPair {
         int8 decimal; // DerviedPair is always  MAX_DECIMAL(-30)
         uint256 lastUpdateTime; // the  min of  asset0.lastUpdateTime  and asset1.lastUpdateTime
         uint256 derivedPrice;
-        int256 roundDifference; //  roundDifference = asset0.roundId - asset1.roundId  if Pair direction is Forward  otherwise  roundDifference = asset1.roundId  - asset0.roundId
     }
 
     event AssetInfoSet(bytes32 indexed _assetIndex, PriceFeed indexed assetInfo);
