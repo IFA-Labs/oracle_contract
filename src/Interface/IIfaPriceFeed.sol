@@ -49,7 +49,7 @@ interface IIfaPriceFeed {
     /// @param _assetIndex The index of the asset
     /// @return assetInfo The price information of the asset
 
-    function getAssetInfo(bytes32 _assetIndex) external returns (PriceFeed memory assetInfo, bool exist);
+    function getAssetInfo(bytes32 _assetIndex) external view returns (PriceFeed memory assetInfo, bool exist);
 
     /// @notice Get the price information of multiple assets
     /// @param _assetIndexes The array of asset indexes
@@ -65,6 +65,7 @@ interface IIfaPriceFeed {
     /// @return pairInfo The derived pair information.
     function getPairbyId(bytes32 _assetIndex0, bytes32 _assetIndex1, PairDirection _direction)
         external
+        view
         returns (DerviedPair memory pairInfo);
 
     /// @notice Retrieves pair information for multiple asset pairs with specified directions.
@@ -76,7 +77,7 @@ interface IIfaPriceFeed {
         bytes32[] memory _assetIndexes0,
         bytes32[] memory _assetsIndexes1,
         PairDirection[] memory _direction
-    ) external returns (DerviedPair[] memory pairsInfo);
+    ) external view returns (DerviedPair[] memory pairsInfo);
 
     /// @notice Retrieves pair information for multiple asset pairs in the forward direction.
     /// @param _assetIndexes0 Array of indexes for the first assets in pairs.
@@ -84,6 +85,7 @@ interface IIfaPriceFeed {
     /// @return pairsInfo Array of derived pair information.
     function getPairsbyIdForward(bytes32[] memory _assetIndexes0, bytes32[] memory _assetsIndexes1)
         external
+        view
         returns (DerviedPair[] memory pairsInfo);
 
     /// @notice Retrieves pair information for multiple asset pairs in the backward direction.
@@ -92,5 +94,6 @@ interface IIfaPriceFeed {
     /// @return pairsInfo Array of derived pair information.
     function getPairsbyIdBackward(bytes32[] memory _assetIndexes0, bytes32[] memory _assetsIndexes1)
         external
+        view
         returns (DerviedPair[] memory pairsInfo);
 }
