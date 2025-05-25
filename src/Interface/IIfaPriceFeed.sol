@@ -31,11 +31,14 @@ interface IIfaPriceFeed {
 
     struct PriceFeed {
         int256 price;
+        /// @param decimal The number of decimal places for the price, stored as a negative value (e.g., -18 for 18 decimals).
         int8 decimal;
         uint64 lastUpdateTime;
     }
 
     struct DerviedPair {
+        /// @notice The number of decimal places for the derivedPrice. This is a fixed value indicating high precision.
+        /// @dev Stored as -30, meaning the derivedPrice is scaled by 10^30.
         int8 decimal; // DerviedPair is always  MAX_DECIMAL(-30)
         uint256 lastUpdateTime; // the  min of  asset0.lastUpdateTime  and asset1.lastUpdateTime
         uint256 derivedPrice;

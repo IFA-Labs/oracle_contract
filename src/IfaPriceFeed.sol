@@ -13,7 +13,7 @@ import {FixedPointMathLib} from "solady-0.1.12/src/utils/FixedPointMathLib.sol";
 
 contract IfaPriceFeed is IIfaPriceFeed, Ownable {
     uint8 constant MAX_DECIMAL = 30;
-    int8 constant MAX_DECIMAL_NEGATIVE = -30;
+    int8 constant DERIVED_PAIR_DECIMAL_VALUE_STORED = -30;
     uint256 constant MAX_INT256 = 57896044618658097711785492504343953926634992332820282019728792003956564819967;
 
     address public IfaPriceFeedVerifier;
@@ -173,7 +173,7 @@ contract IfaPriceFeed is IIfaPriceFeed, Ownable {
         }
 
         return DerviedPair({
-            decimal: MAX_DECIMAL_NEGATIVE,
+            decimal: DERIVED_PAIR_DECIMAL_VALUE_STORED,
             lastUpdateTime: _min(_assetInfo0.lastUpdateTime, _assetInfo1.lastUpdateTime),
             derivedPrice: derivedPrice
         });
@@ -235,10 +235,35 @@ contract IfaPriceFeed is IIfaPriceFeed, Ownable {
     /// @return the scaled prices of the pair
 
     function _scalePrice(int256 price, int8 decimal) internal pure returns (uint256) {
-        uint256 scalePrice = uint256(price) * 10 ** (MAX_DECIMAL - uint8(-decimal));
-        require(scalePrice <= MAX_INT256);
-        require(scalePrice > uint256(price));
-        return scalePrice;
+        // Price must be non-negative for scaling.
+        require(price >= 0, "IfaPriceFeed: Price must be non-negative for scaling");
+
+        // If price is 0, scaled price is 0.
+        if (price == 0) {
+            return 0;
+        }
+
+        // Calculate the exponent resulting from the difference between MAX_DECIMAL and the asset's decimal.
+        // The asset's decimal is expected to be negative (e.g., -18 for 18 decimals).
+        // uint8(-decimal) converts, for example, -18 to 18.
+        // This assumes 'decimal' is negative as per PriceFeed.decimal's NatSpec.
+        // If 'decimal' were positive, uint8(-decimal) could lead to unexpected exponent values.
+        uint8 decimalMagnitude = uint8(-decimal); // e.g., if decimal is -18, decimalMagnitude is 18.
+        require(decimalMagnitude <= MAX_DECIMAL, "IfaPriceFeed: Asset decimal magnitude cannot exceed MAX_DECIMAL"); // Ensures exponent is not negative
+
+        uint256 exponent = MAX_DECIMAL - decimalMagnitude;
+        uint256 nonNegativePrice = uint256(price);
+
+        if (exponent == 0) {
+            // No scaling needed if asset's decimal already matches MAX_DECIMAL
+            return nonNegativePrice;
+        } else {
+            // Calculate the scaling factor
+            uint256 scalingFactor = 10 ** exponent;
+            // Check for overflow before multiplication
+            require(nonNegativePrice <= type(uint256).max / scalingFactor, "IfaPriceFeed: scalePrice multiplication overflow");
+            return nonNegativePrice * scalingFactor;
+        }
     }
     ///@dev Override to return true to prevent double-initialization.
 
