@@ -1,4 +1,3 @@
-
 # IFA Oracle Price Feed System
 
 A decentralized oracle solution specialized for stablecoin price data across various currencies (USDC, USDT, EURC, CNGN, etc.), providing accurate and transparent price information. The system stores individual asset prices and calculates exchange rates between any pair of stablecoins or other supported assets.
@@ -14,7 +13,6 @@ A decentralized oracle solution specialized for stablecoin price data across var
 - Store and manage asset price information against USD
 - Calculate exchange rates between any two assets
 - Support for both forward (asset0/asset1) and backward (asset1/asset0) pair calculations
-- Round tracking to ensure data freshness
 - Decimal scaling for precision in calculations
 - Role-based access control with verifier and relayer architecture
 
@@ -58,8 +56,8 @@ assetIndexes[0] =  keccak256("CNGN"); // CNGN/USD
 assetIndexes[1] =  keccak256("BTC"); // BTC/USD
 
 IIfaPriceFeed.PriceFeed[] memory prices = new IIfaPriceFeed.PriceFeed[](2);
-prices[0] = IIfaPriceFeed.PriceFeed({decimal: -18, lastUpdateTime: block.timestamp, price: 2200000000000000000000000000, roundId: 1});
-prices[1] = IIfaPriceFeed.PriceFeed({decimal: -18, lastUpdateTime: block.timestamp, price: 68000000000000000000000000000000, roundId: 1});
+prices[0] = IIfaPriceFeed.PriceFeed({decimal: -18, lastUpdateTime: block.timestamp, price: 2200000000000000000000000000});
+prices[1] = IIfaPriceFeed.PriceFeed({decimal: -18, lastUpdateTime: block.timestamp, price: 68000000000000000000000000000000});
 
 verifier.submitPriceFeed(assetIndexes, prices);
 
@@ -87,16 +85,14 @@ Defines the structure and functionality for the price feed system.
 #### Key Structures:
 
 - **`PriceFeed`**: Stores individual asset price information
-  - `decimal`: Decimal precision of the price
-  - `lastUpdateTime`: Timestamp of last update
-  - `price`: Current price value
-  - `roundId`: Current round identifier
+  - `decimal`: The number of decimal places for the `price`. This is stored as a negative value (e.g., -18 indicates 18 decimal places for the asset's price against USD).
+  - `lastUpdateTime`: Timestamp of last update.
+  - `price`: Current price value of the asset against USD, scaled according to its `decimal` value.
 
 - **`DerviedPair`**: Represents exchange rate between two assets
-  - `decimal`: Always set to MAX_DECIMAL_NEGATIVE (-30)
-  - `lastUpdateTime`: Min timestamp of the two assets
-  - `derivedPrice`: Calculated exchange rate
-  - `roundDifference`: Difference between round IDs
+  - `decimal`: Indicates the precision of `derivedPrice`. This is a fixed value, `DERIVED_PAIR_DECIMAL_VALUE_STORED` (e.g., -30), meaning `derivedPrice` is scaled by 10^30.
+  - `lastUpdateTime`: Min timestamp of the two assets involved in the pair.
+  - `derivedPrice`: Calculated exchange rate, scaled by 10^30.
 
 - **`PairDirection`**: Enum for specifying direction
   - `Forward`: asset0/asset1
@@ -108,8 +104,8 @@ Main contract for storing asset prices and calculating exchange rates.
 
 #### Key Constants:
 
-- `MAX_DECIMAL`:          Set to 30 for high precision in calculations
-- `MAX_DECIMAL_NEGATIVE`: Set to -30 for high precision in calculations
+- `MAX_DECIMAL`:          Set to 30 for high precision in internal calculations. This is the target precision to which asset prices are scaled before calculating derived pair prices.
+- `DERIVED_PAIR_DECIMAL_VALUE_STORED`: Set to -30. This is the fixed decimal value for all `DerviedPair` instances, indicating that the `derivedPrice` is stored scaled by 10^30.
 
 ### **`IfaPriceFeedVerifier`**
 
@@ -146,7 +142,7 @@ assets[1] = keccak256("BTC"); // BTC/USD
 - **Visibility:** `external view`
 - **Inputs:** `bytes32 _assetIndex0, bytes32 _assetIndex1, PairDirection _direction`
 - **Outputs:** `DerviedPair memory pairInfo`
-- **Description:** Calculates the exchange rate between two assets in the specified direction.
+- **Description:** Calculates the exchange rate between two assets in the specified direction. The returned `derivedPrice` is scaled by 10^30.
 - **Example:**
 ```solidity
 // Get CNGN/BTC rate
@@ -161,7 +157,7 @@ IIfaPriceFeed.DerviedPair memory pair = priceFeed.getPairbyId(
 - **Visibility:** `external view`
 - **Inputs:** `bytes32[] calldata _assetIndexes0, bytes32[] calldata _assetsIndexes1`
 - **Outputs:** `DerviedPair[] memory pairsInfo`
-- **Description:** Batch calculation of exchange rates between multiple asset pairs in forward direction.
+- **Description:** Batch calculation of exchange rates between multiple asset pairs in forward direction. Each `derivedPrice` in the output is scaled by 10^30.
 - **Example:**
 ```solidity
 bytes32[] memory assets0 = new bytes32[](2);
@@ -178,7 +174,7 @@ IIfaPriceFeed.DerviedPair[] memory pairs = priceFeed.getPairsbyIdForward(assets0
 - **Visibility:** `external view`
 - **Inputs:** `bytes32[] calldata _assetIndexes0, bytes32[] calldata _assetsIndexes1`
 - **Outputs:** `DerviedPair[] memory pairsInfo`
-- **Description:** Batch calculation of exchange rates between multiple asset pairs in backward direction.
+- **Description:** Batch calculation of exchange rates between multiple asset pairs in backward direction. Each `derivedPrice` in the output is scaled by 10^30.
 - **Example:**
 ```solidity
 bytes32[] memory assets0 = new bytes32[](2);
@@ -195,7 +191,7 @@ IIfaPriceFeed.DerviedPair[] memory pairs = priceFeed.getPairsbyIdBackward(assets
 - **Visibility:** `external view`
 - **Inputs:** `bytes32[] calldata _assetIndexes0, bytes32[] calldata _assetsIndexes1, PairDirection[] calldata _direction`
 - **Outputs:** `DerviedPair[] memory pairsInfo`
-- **Description:** Batch calculation with custom direction for each pair.
+- **Description:** Batch calculation with custom direction for each pair. Each `derivedPrice` in the output is scaled by 10^30.
 - **Example:**
 ```solidity
 bytes32[] memory assets0 = new bytes32[](2);
@@ -218,17 +214,16 @@ IIfaPriceFeed.DerviedPair[] memory pairs = priceFeed.getPairsbyId(assets0, asset
 - **Visibility:** `external`
 - **Inputs:** `bytes32 _assetIndex, PriceFeed calldata assetInfo`
 - **Outputs:** None
-- **Description:** Sets price information for an asset (only callable by the verifier).
+- **Description:** Sets price information for an asset (only callable by the verifier). Ensure `assetInfo.decimal` is a negative value representing the asset's precision (e.g., -18 for 18 decimals).
 - **Example:**
 ```solidity
 // Can only be called by the verifier contract
 priceFeed.setAssetInfo(
     keccak256("CNGN"), // CNGN/USD
     IIfaPriceFeed.PriceFeed({
-        decimal: -18,
+        decimal: -18, // Representing 18 decimal places for CNGN price
         lastUpdateTime: block.timestamp,
-        price: 2200000000000000000000000000,
-        roundId: 1
+        price: 2200000000000000000000000000 // Example price for CNGN/USD
     })
 );
 ```
@@ -249,7 +244,7 @@ priceFeed.setVerifier(address(verifierContract));
 - **Visibility:** `external`
 - **Inputs:** `bytes32[] calldata _assetindex, IIfaPriceFeed.PriceFeed[] calldata _prices`
 - **Outputs:** None
-- **Description:** Submits new price data for multiple assets (only callable by relayer node).
+- **Description:** Submits new price data for multiple assets (only callable by relayer node). Ensure each `PriceFeed` object in the `_prices` array has its `decimal` field set correctly (e.g., -18 for an asset with 18 decimal places).
 - **Example:**
 ```solidity
 bytes32[] memory assetIndexes = new bytes32[](2);
@@ -257,8 +252,8 @@ assetIndexes[0] = keccak256("CNGN"); // CNGN/USD
 assetIndexes[1] = keccak256("BTC"); // BTC/USD
 
 IIfaPriceFeed.PriceFeed[] memory prices = new IIfaPriceFeed.PriceFeed[](2);
-prices[0] = IIfaPriceFeed.PriceFeed({decimal: -18, lastUpdateTime: block.timestamp, price: 2200000000000000000000000000, roundId: 1});
-prices[1] = IIfaPriceFeed.PriceFeed({decimal: -18, lastUpdateTime: block.timestamp, price: 68000000000000000000000000000000, roundId: 1});
+prices[0] = IIfaPriceFeed.PriceFeed({decimal: -18, lastUpdateTime: block.timestamp, price: 2200000000000000000000000000}); // CNGN price with 18 decimals
+prices[1] = IIfaPriceFeed.PriceFeed({decimal: -18, lastUpdateTime: block.timestamp, price: 68000000000000000000000000000000}); // BTC price with 18 decimals
 
 verifier.submitPriceFeed(assetIndexes, prices);
 ```
@@ -275,4 +270,3 @@ verifier.setRelayerNode(newRelayerAddress);
 
 
 .
-

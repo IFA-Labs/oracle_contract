@@ -10,6 +10,8 @@ contract IfaPriceFeedVerifier is Ownable {
     error OnlyRelayerNode(address _caller);
     error InvalidAssetIndexorPriceLength();
 
+    event RelayerNodeSet(address indexed newRelayerNode, address indexed oldRelayerNode);
+
     address public relayerNode;
     IIfaPriceFeed public immutable IfaPriceFeed;
 
@@ -45,7 +47,9 @@ contract IfaPriceFeedVerifier is Ownable {
 
     function setRelayerNode(address _relayerNode) external onlyOwner {
         require(_relayerNode != address(0), InvalidRelayerNode(_relayerNode));
+        address oldRelayerNode = relayerNode;
         relayerNode = _relayerNode;
+        emit RelayerNodeSet(_relayerNode, oldRelayerNode);
     }
     ///@dev Override to return true to prevent double-initialization.
 

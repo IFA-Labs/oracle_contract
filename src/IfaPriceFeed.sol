@@ -229,13 +229,13 @@ contract IfaPriceFeed is IIfaPriceFeed, Ownable {
         }
     }
 
-    /// @notice Helps to scale the price of a pair id to 18 decimal places
+    /// @notice Helps to scale the price of a pair id to 30 decimal places
     /// @param price the price of the pair ID
     /// @param decimal number of decimals that the pair info supports
     /// @return the scaled prices of the pair
 
     function _scalePrice(int256 price, int8 decimal) internal pure returns (uint256) {
-        uint256 scalePrice = uint256(price) * 10 ** (MAX_DECIMAL - uint8(-decimal));
+        uint256 scalePrice = uint256(price) * 10 ** (MAX_DECIMAL - abs(decimal));
         require(scalePrice <= MAX_INT256);
         require(scalePrice > uint256(price));
         return scalePrice;
@@ -244,5 +244,9 @@ contract IfaPriceFeed is IIfaPriceFeed, Ownable {
 
     function _guardInitializeOwner() internal pure override returns (bool guard) {
         guard = true;
+    }
+
+    function abs(int8 n) internal pure returns (uint8 x) {
+        x = n >= 0 ? uint8(n) : uint8(-n);
     }
 }
