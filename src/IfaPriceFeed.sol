@@ -128,7 +128,7 @@ contract IfaPriceFeed is IIfaPriceFeed, Ownable {
 
         require(
             _assetIndexes0.length == _assetsIndexes1.length && _assetIndexes0.length == _direction.length,
-            InvalidAssetorDirectionIndexLength(_assetIndexes0.length, _assetIndexes0.length, _direction.length)
+            InvalidAssetorDirectionIndexLength(_assetIndexes0.length, _assetsIndexes1.length, _direction.length)
         );
         for (uint256 i = 0; i < arrayLength; i++) {
             pairsInfo[i] = _getPairInfo(_assetIndexes0[i], _assetsIndexes1[i], _direction[i]);
