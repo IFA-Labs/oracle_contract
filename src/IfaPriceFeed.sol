@@ -199,7 +199,6 @@ contract IfaPriceFeed is IIfaPriceFeed, Ownable {
     /// @return assetInfo The price information of the asset
 
     function _getAssetInfo(bytes32 _assetIndex) internal view returns (PriceFeed memory assetInfo, bool exist) {
-        //require(_assetInfo[_assetIndex].lastUpdateTime > 0, InvalidAssetIndex(_assetIndex));
         if (_assetInfo[_assetIndex].lastUpdateTime > 0) {
             exist = true;
             return (_assetInfo[_assetIndex], exist);
