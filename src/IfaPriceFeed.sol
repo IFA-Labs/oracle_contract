@@ -237,8 +237,8 @@ contract IfaPriceFeed is IIfaPriceFeed, Ownable {
 
     function _scalePrice(int256 price, int8 decimal) internal pure returns (uint256) {
         uint256 scalePrice = uint256(price) * 10 ** (MAX_DECIMAL - abs(decimal));
-        require(scalePrice <= MAX_INT256);
-        require(scalePrice > uint256(price));
+        require(scalePrice <= MAX_INT256 ,InvalidScalePrice());
+        require(scalePrice > uint256(price),InvalidScalePrice());
         return scalePrice;
     }
     ///@dev Override to return true to prevent double-initialization.
