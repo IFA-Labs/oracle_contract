@@ -146,6 +146,7 @@ contract IfaPriceFeed is IIfaPriceFeed, Ownable {
         view
         returns (DerviedPair memory pairInfo)
     {
+        require(_assetIndex0 != _assetIndex1, InvalidAssetPairing());
         (PriceFeed memory _assetInfo0, bool exist0) = _getAssetInfo(_assetIndex0);
         (PriceFeed memory _assetInfo1, bool exist1) = _getAssetInfo(_assetIndex1);
         if (!exist0) revert InvalidAssetIndex(_assetIndex0);

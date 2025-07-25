@@ -23,7 +23,7 @@ interface IIfaPriceFeed {
     /// @param _assetIndex1 The length of the second asset index array.
     /// @param _direction The length of the direction array.
     error InvalidAssetorDirectionIndexLength(uint256 _assetIndex0, uint256 _assetIndex1, uint256 _direction);
-
+    error InvalidAssetPairing();
     /// @notice Thrown when the caller is not the Verifer contract.
     error NotVerifier();
     /// @notice Thrown when the verifier is set to zero address.
