@@ -37,7 +37,7 @@ contract IfaPriceFeedVerifier is Ownable {
             IIfaPriceFeed.PriceFeed calldata currentPriceFeed = _prices[i];
             uint256 currenttimestamp = currentPriceFeed.lastUpdateTime;
             (IIfaPriceFeed.PriceFeed memory prevPriceFeed,) = IfaPriceFeed.getAssetInfo(pair);
-            if (prevPriceFeed.lastUpdateTime > currenttimestamp) {
+            if (prevPriceFeed.lastUpdateTime >= currenttimestamp) {
                 continue;
             }
 
