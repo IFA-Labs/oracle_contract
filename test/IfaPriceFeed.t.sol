@@ -135,7 +135,7 @@ contract IfaPriceFeedTest is BaseTest {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                IIfaPriceFeed.InvalidAssetIndexLength.selector, assetIndexes0.length, assetIndexes0.length
+                IIfaPriceFeed.InvalidAssetIndexLength.selector, assetIndexes0.length, assetIndexes1.length
             )
         );
 
@@ -182,7 +182,7 @@ contract IfaPriceFeedTest is BaseTest {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                IIfaPriceFeed.InvalidAssetIndexLength.selector, assetIndexes0.length, assetIndexes0.length
+                IIfaPriceFeed.InvalidAssetIndexLength.selector, assetIndexes0.length, assetIndexes1.length
             )
         );
 

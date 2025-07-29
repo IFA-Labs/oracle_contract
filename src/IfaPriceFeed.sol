@@ -82,7 +82,7 @@ contract IfaPriceFeed is IIfaPriceFeed, Ownable {
         // sayh you have asset0 =  CNGN/USD  and  asset1 =  BTC/USD   the function will give you  CNGN/BTC
         require(
             _assetIndexes0.length == _assetsIndexes1.length,
-            InvalidAssetIndexLength(_assetIndexes0.length, _assetIndexes0.length)
+            InvalidAssetIndexLength(_assetIndexes0.length, _assetsIndexes1.length)
         );
         for (uint256 i = 0; i < arrayLength; i++) {
             pairsInfo[i] = _getPairInfo(_assetIndexes0[i], _assetsIndexes1[i], PairDirection.Forward);
@@ -105,7 +105,7 @@ contract IfaPriceFeed is IIfaPriceFeed, Ownable {
         // say you have asset0 =  CNGN/USD  and  asset1 =  BTC/USD   the function will give you BTC/CNGN
         require(
             _assetIndexes0.length == _assetsIndexes1.length,
-            InvalidAssetIndexLength(_assetIndexes0.length, _assetIndexes0.length)
+            InvalidAssetIndexLength(_assetIndexes0.length, _assetsIndexes1.length)
         );
         for (uint256 i = 0; i < arrayLength; i++) {
             pairsInfo[i] = _getPairInfo(_assetIndexes0[i], _assetsIndexes1[i], PairDirection.Backward);
