@@ -1,6 +1,13 @@
 # IFA Oracle Price Feed System
 
 A decentralized oracle solution specialized for stablecoin price data across various currencies (USDC, USDT, EURC, CNGN, etc.), providing accurate and transparent price information. The system stores individual asset prices and calculates exchange rates between any pair of stablecoins or other supported assets.
+### Contract deployed on Assetchain test at :
+```shell
+== Logs ==
+  
+  `IfaPriceFeed` deployed at: `0xBAc31e568883774A632275F9c8E7A5Bd117000F7`
+  `IfaPriceFeedVerifier` deployed at: `0xfA8F9975C81c3b2596E009905Da4B1349Bd93307`
+```
 ### Contract deployed on base sepolia at :
 ```shell
 == Logs ==

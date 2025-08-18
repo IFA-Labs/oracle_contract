@@ -32,13 +32,11 @@ contract IfaPriceFeedVerifier is Ownable {
         onlyRelayerNode
     {
         require(_assetindex.length == _prices.length, InvalidAssetIndexorPriceLength());
-      
-
 
         for (uint256 i = 0; i < _assetindex.length; i++) {
             bytes32 pair = _assetindex[i];
             IIfaPriceFeed.PriceFeed calldata currentPriceFeed = _prices[i];
-              require(currentPriceFeed.price > 0,InvalidAssePrice());
+            require(currentPriceFeed.price > 0, InvalidAssePrice());
             uint256 currenttimestamp = currentPriceFeed.lastUpdateTime;
             (IIfaPriceFeed.PriceFeed memory prevPriceFeed,) = IfaPriceFeed.getAssetInfo(pair);
             if (prevPriceFeed.lastUpdateTime >= currenttimestamp) {
