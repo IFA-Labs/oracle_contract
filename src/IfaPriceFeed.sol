@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.29;
+pragma solidity 0.8.30;
 
 import {IIfaPriceFeed} from "./Interface/IIfaPriceFeed.sol";
 import {Ownable} from "solady-0.1.12/src/auth/Ownable.sol";
@@ -41,11 +41,7 @@ contract IfaPriceFeed is IIfaPriceFeed, Ownable {
     /// @notice  Get the price information of an array of assets revert if any asset index is invalid
     /// @param _assetIndexes The array of asset indexes
     /// @return assetsInfo The price information of the assets
-    function getAssetsInfo(bytes32[] calldata _assetIndexes)
-        external
-        view
-        returns (PriceFeed[] memory, bool[] memory)
-    {
+    function getAssetsInfo(bytes32[] calldata _assetIndexes) external view returns (PriceFeed[] memory, bool[] memory) {
         uint256 arrayLength = _assetIndexes.length;
         PriceFeed[] memory assetsInfo = new PriceFeed[](arrayLength);
         bool[] memory exists = new bool[](arrayLength);

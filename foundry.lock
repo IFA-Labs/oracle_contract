@@ -1,0 +1,11 @@
+{
+  "dependencies/forge-std": {
+    "tag": {
+      "name": "v1.12.0",
+      "rev": "7117c90c8cf6c68e5acce4f09a6b24715cea4de6"
+    }
+  },
+  "lib/forge-std": {
+    "rev": "3b20d60d14b343ee4f908cb8079495c07f5e8981"
+  }
+}

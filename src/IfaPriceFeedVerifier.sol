@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.29;
+pragma solidity 0.8.30;
 
 import {IIfaPriceFeed} from "./Interface/IIfaPriceFeed.sol";
 import {Ownable} from "solady-0.1.12/src/auth/Ownable.sol";

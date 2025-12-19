@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.29;
+pragma solidity 0.8.30;
 
 interface IIfaPriceFeed {
     enum PairDirection {
         Forward, // asset0/asset1
         Backward // asset1/asset0
-
     }
     /// @notice Thrown when an invalid asset index is used. i.e  asset does not exist
     /// @param _assetIndex The invalid asset index.

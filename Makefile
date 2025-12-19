@@ -26,6 +26,14 @@ deploy-base-mainnet:
 		--etherscan-api-key $(BASESCAN_API_KEY) \
 		--verify \
 		--broadcast
+deploy-mantle-testnet:
+	@forge script script/DeployPriceFeed.s.sol:DeployPriceFeed \
+		--rpc-url $(MANTLE_RPC_URL) \
+		--private-key $(private_key) \
+		--etherscan-api-key $(ETHERSCAN_v2_API_KEY) \
+		--verify \
+		--broadcast
+		
 deploy-chiado:
 	@forge script script/DeployPriceFeed.s.sol:DeployPriceFeed \
 		--rpc-url $(CHIADO_RPC_URL) \

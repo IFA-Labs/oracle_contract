@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.29;
+pragma solidity 0.8.30;
 
 import "forge-std/Test.sol";
 import "../src/IfaPriceFeedVerifier.sol";
@@ -270,9 +270,7 @@ contract IfaPriceFeedTest is BaseTest {
 
     function testSetAssetInfo_UnauthorizedCaller() public {
         IIfaPriceFeed.PriceFeed memory newPrice = IIfaPriceFeed.PriceFeed({
-            decimal: -18,
-            lastUpdateTime: uint64(block.timestamp) + 100,
-            price: 5200000000000 * 10e10
+            decimal: -18, lastUpdateTime: uint64(block.timestamp) + 100, price: 5200000000000 * 10e10
         });
 
         // Try to call from non-verifier address
@@ -306,9 +304,7 @@ contract IfaPriceFeedTest is BaseTest {
 
     function testSetAssetInfo_EventEmission() public {
         IIfaPriceFeed.PriceFeed memory newPrice = IIfaPriceFeed.PriceFeed({
-            decimal: -18,
-            lastUpdateTime: uint64(block.timestamp) + 100,
-            price: 5200000000000 * 10e10
+            decimal: -18, lastUpdateTime: uint64(block.timestamp) + 100, price: 5200000000000 * 10e10
         });
 
         // Test for event emission

@@ -1,6 +1,6 @@
 [[dependencies]]
 name = "solady"
-version = "0.1.12"
-url = "https://soldeer-revisions.s3.amazonaws.com/solady/0_1_12_11-03-2025_11:14:32_solady.zip"
-checksum = "87d3f8c0443f6a34267c9dd8acf4f0a788379aa34b6f78d0c4c086ef0dd6a679"
-integrity = "81dfe91a4a5693db197d3f77f399215f433e5ad8cad25e5e7c77d103965f44c7"
+version = "0.1.14"
+url = "https://soldeer-revisions.s3.amazonaws.com/solady/0_1_14_03-04-2025_08:02:53_solady.zip"
+checksum = "82089b7c005404399d73f538545a795c5e24ec38009793ccd008000f1d66eb8b"
+integrity = "e40e7781170e43fed51b973bc3c25287a0852d0ed6053a461ac391c7601ae6dd"

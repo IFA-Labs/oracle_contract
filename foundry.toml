@@ -4,11 +4,11 @@ out = "out"
 libs = ["lib", "dependencies"]
 optimizer = true
 optimizer_runs = 1_000_000
-solc_version = "0.8.29"
+solc_version = "0.8.30"
 auto_detect_solc = true
 
 
 [dependencies]
-solady = "0.1.12"
+solady = "0.1.14"
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

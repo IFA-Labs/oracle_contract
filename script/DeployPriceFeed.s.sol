@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.8.29;
+pragma solidity 0.8.30;
 
 import {Script} from "forge-std/Script.sol";
 import {console} from "forge-std/console.sol";
@@ -10,8 +10,8 @@ contract DeployPriceFeed is Script {
     IfaPriceFeed ifaPriceFeed;
     IfaPriceFeedVerifier ifaPriceFeedVerifier;
 
-    bytes32 constant SALT_IfaPriceFeed = keccak256("ifaPriceFeed");
-    bytes32 constant SALT_ifaPriceFeedVerifier = keccak256("ifaPriceFeedVerifier");
+    bytes32 constant SALT_IfaPriceFeed = keccak256("ifaPriceFeedh");
+    bytes32 constant SALT_ifaPriceFeedVerifier = keccak256("ifaPriceFeedVerifierh");
 
     function run() public {
         vm.startBroadcast();
