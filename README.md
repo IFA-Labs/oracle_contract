@@ -41,10 +41,11 @@ A decentralized oracle solution specialized for stablecoin price data across var
 
 ## Installation & Setup
 
-1. Ensure you have Solidity 0.8.29 installed
+1. Ensure you have Solidity 0.8.30 installed
 2. Clone the repository
 3. Install dependencies:
    ```shell
+    forge install  foundry-rs/forge-std
     forge soldeer install solady~0.1.14
     forge build
    ```
