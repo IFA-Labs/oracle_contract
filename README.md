@@ -29,6 +29,13 @@ A decentralized oracle solution specialized for stablecoin price data across var
   `IfaPriceFeed` deployed at: `0xbB85ccAcD96130E94Ad776F5a97b540A5EC82D4a`
   `IfaPriceFeedVerifier` deployed at: `0xf231c98f062836125747D602F6Bf215b8A44FD68`
 ```
+### Contract deployed on MANTLE SEPOLIA at :
+```shell
+== Logs ==
+  
+  `IfaPriceFeed` deployed at: `0xbB85ccAcD96130E94Ad776F5a97b540A5EC82D4a`
+  `IfaPriceFeedVerifier` deployed at: `0xf231c98f062836125747D602F6Bf215b8A44FD68`
+```
 
 
 ## Features

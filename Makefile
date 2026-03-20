@@ -50,3 +50,9 @@ deploy-gnosis:
 		--verifier blockscout \
 		--verifier-url https://gnosis.blockscout.com/api/ \
 		--broadcast
+deploy-hedera:
+	@forge script script/DeployPriceFeed.s.sol:DeployPriceFeed \
+		--rpc-url $(HEDERA_RPC_URL) \
+		--private-key $(private_key) \
+		--broadcast
+# used manual verify because api is not working
