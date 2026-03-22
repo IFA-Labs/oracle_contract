@@ -53,6 +53,6 @@ deploy-gnosis:
 deploy-hedera:
 	@forge script script/DeployPriceFeed.s.sol:DeployPriceFeed \
 		--rpc-url $(HEDERA_RPC_URL) \
-		--private-key $(private_key) \
+		--private-key $(private_key_he) \
 		--broadcast
 # used manual verify because api is not working
